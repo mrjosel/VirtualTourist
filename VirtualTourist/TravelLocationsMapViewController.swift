@@ -9,14 +9,20 @@
 import UIKit
 import MapKit
 
-class TravelLocationsMapViewController: UIViewController {
+class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
     
+    override func viewWillAppear(animated: Bool) {
+        self.navigationController?.navigationBar.hidden = true
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        //make vc mapView delegate
+        self.mapView.delegate = self
         
     }
 
@@ -24,7 +30,5 @@ class TravelLocationsMapViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
 }
 

@@ -7,13 +7,19 @@
 //
 
 import UIKit
+import MapKit
 
 class PhotoAlbumViewController: UIViewController {
 
+    //outlets
+    @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var photoCollectionView: UICollectionView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        
     }
 
     override func didReceiveMemoryWarning() {
