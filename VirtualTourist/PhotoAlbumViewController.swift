@@ -14,11 +14,14 @@ class PhotoAlbumViewController: UIViewController {
     //outlets
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var photoCollectionView: UICollectionView!
+    @IBOutlet weak var navBar: UINavigationBar!
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        
+//        self.navBar.frame = CGRect(x: 0, y: 0, width: 600, height: 64)
         
     }
 
