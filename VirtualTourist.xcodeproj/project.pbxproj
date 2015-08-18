@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B79586DB1B83B66B00C12DBE /* PinModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B79586D91B83B66B00C12DBE /* PinModel.xcdatamodeld */; };
+		B79586DD1B83B69500C12DBE /* CoreDataStackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B79586DC1B83B69500C12DBE /* CoreDataStackManager.swift */; };
 		B7EF20F81B7ADDFA004942B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7EF20F71B7ADDFA004942B7 /* AppDelegate.swift */; };
 		B7EF20FB1B7ADDFA004942B7 /* VirtualTourist.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B7EF20F91B7ADDFA004942B7 /* VirtualTourist.xcdatamodeld */; };
 		B7EF20FD1B7ADDFA004942B7 /* TravelLocationsMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7EF20FC1B7ADDFA004942B7 /* TravelLocationsMapViewController.swift */; };
@@ -28,6 +30,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B79586DA1B83B66B00C12DBE /* PinModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PinModel.xcdatamodel; sourceTree = "<group>"; };
+		B79586DC1B83B69500C12DBE /* CoreDataStackManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStackManager.swift; sourceTree = "<group>"; };
 		B7EF20F21B7ADDFA004942B7 /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7EF20F61B7ADDFA004942B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B7EF20F71B7ADDFA004942B7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -60,6 +64,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B79586D81B83B65500C12DBE /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				B79586D91B83B66B00C12DBE /* PinModel.xcdatamodeld */,
+				B79586DC1B83B69500C12DBE /* CoreDataStackManager.swift */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
 		B7EF20E91B7ADDFA004942B7 = {
 			isa = PBXGroup;
 			children = (
@@ -81,6 +94,7 @@
 		B7EF20F41B7ADDFA004942B7 /* VirtualTourist */ = {
 			isa = PBXGroup;
 			children = (
+				B79586D81B83B65500C12DBE /* Model */,
 				B7EF211A1B7ADE3E004942B7 /* Controller */,
 				B7EF20F71B7ADDFA004942B7 /* AppDelegate.swift */,
 				B7EF21011B7ADDFA004942B7 /* Images.xcassets */,
@@ -228,8 +242,10 @@
 			files = (
 				B7EF20FD1B7ADDFA004942B7 /* TravelLocationsMapViewController.swift in Sources */,
 				B7EF20FB1B7ADDFA004942B7 /* VirtualTourist.xcdatamodeld in Sources */,
+				B79586DB1B83B66B00C12DBE /* PinModel.xcdatamodeld in Sources */,
 				B7EF20F81B7ADDFA004942B7 /* AppDelegate.swift in Sources */,
 				B7EF211C1B7ADE94004942B7 /* PhotoAlbumViewController.swift in Sources */,
+				B79586DD1B83B69500C12DBE /* CoreDataStackManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -425,6 +441,7 @@
 				B7EF21161B7ADDFA004942B7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B7EF21171B7ADDFA004942B7 /* Build configuration list for PBXNativeTarget "VirtualTouristTests" */ = {
 			isa = XCConfigurationList;
@@ -433,10 +450,21 @@
 				B7EF21191B7ADDFA004942B7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
 /* Begin XCVersionGroup section */
+		B79586D91B83B66B00C12DBE /* PinModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				B79586DA1B83B66B00C12DBE /* PinModel.xcdatamodel */,
+			);
+			currentVersion = B79586DA1B83B66B00C12DBE /* PinModel.xcdatamodel */;
+			path = PinModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
 		B7EF20F91B7ADDFA004942B7 /* VirtualTourist.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
