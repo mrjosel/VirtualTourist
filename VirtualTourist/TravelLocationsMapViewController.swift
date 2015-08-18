@@ -35,13 +35,18 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     
     //create view for annotations
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
+        //TODO: FIX RADIUS BUG
+        
         //reuseID and pinView
         let reuseID = "pin"
         var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseID) as? MKPinAnnotationView
+        
+        //if no pinView, then create one
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseID)
             pinView!.animatesDrop = true
         } else {
+            //otherwise, add annotation
             pinView!.annotation = annotation
         }
         
@@ -49,9 +54,9 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     }
     
     
-    
+    //add pin to array and to map
     func dropPin(sender: UIGestureRecognizer) {
-        
+        //keeps from user dragging and adding multiple pins
         if sender.state == UIGestureRecognizerState.Ended || sender.state == UIGestureRecognizerState.Changed {
             return
         } else {
