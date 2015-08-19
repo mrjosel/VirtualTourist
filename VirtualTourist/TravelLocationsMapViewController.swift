@@ -10,6 +10,8 @@ import UIKit
 import MapKit
 import CoreData
 
+//@objc(Pin)
+
 class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate {
     
     //Map View
@@ -19,7 +21,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     var pinDropGesture : UILongPressGestureRecognizer?
     
     //annotations array
-    var annotations = [MKPointAnnotation]()
+//    var annotations = [MKPointAnnotation]()
     
     //shared context
     lazy var sharedContext: NSManagedObjectContext = {
@@ -70,15 +72,15 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         
         //only allow pins to be dropped once, not checking state place pins indefinitely
         if sender.state == UIGestureRecognizerState.Began {
-            //create annotation
-            var dropPin = MKPointAnnotation()
-            dropPin.coordinate = coordinates
+//            //create annotation
+//            var dropPin = MKPointAnnotation()
+//            dropPin.coordinate = coordinates
             
-            //apend to array
-            self.annotations.append(dropPin)
+            //create Pin object
+            let pinToBeAdded = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
             
-            //add to mapview
-            self.mapView.addAnnotation(dropPin)
+            //save context
+            CoreDataStackManager.sharedInstance().saveContext()
         }
     }
     
@@ -95,7 +97,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         }
         
         //for each persisted pin object
-        for object in sectionInfo as! NSArray {
+        for object in sectionInfo.objects {
             //get persisted latitude and longitude information
             let lat = (object as! Pin).latitude as! Double
             let lon = (object as! Pin).longitude as! Double
@@ -133,23 +135,51 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         return pinView
     }
     
+    func mapView(mapView: MKMapView!, annotationView view: MKAnnotationView!, didChangeDragState newState: MKAnnotationViewDragState, fromOldState oldState: MKAnnotationViewDragState) {
+        
+        println("drag state changed")
+        //TODO: ADD INDEXING TO PIN OBJECTS
+        CoreDataStackManager.sharedInstance().saveContext()
+    }
     
     
-//    func controllerWillChangeContent(controller: NSFetchedResultsController) {
-//
-//    }
-//    
-//    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
-//        
-//    }
-//    
-//    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
-//        
-//    }
-//    
-//    
+    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+        
+        //create annotation from anObject
+        let pin = anObject as! Pin
+        let droppedPin = MKPointAnnotation()
+        droppedPin.coordinate = pin.coordinate
+        
+        
+        //check which type
+        switch type {
+            //insert - add pin to map
+        case NSFetchedResultsChangeType.Insert:
+            self.mapView.addAnnotation(droppedPin)
+            
+            //delete - remove pin from map
+        case NSFetchedResultsChangeType.Delete:
+            self.mapView.removeAnnotation(droppedPin)
+            
+            //update - remove pin from map, add it back in
+        case NSFetchedResultsChangeType.Update:
+            self.mapView.removeAnnotation(droppedPin)
+            self.mapView.addAnnotation(droppedPin)
+            
+            //default - break
+        default:
+            break
+        }
+        
+    }
+    
+    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+        
+    }
+    
+    
 //    func controllerDidChangeContent(controller: NSFetchedResultsController) {
-//
+//        UIApplication.sharedApplication().networkActivityIndicatorVisible = false
 //    }
 
     override func didReceiveMemoryWarning() {
