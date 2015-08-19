@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		B79586DB1B83B66B00C12DBE /* PinModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B79586D91B83B66B00C12DBE /* PinModel.xcdatamodeld */; };
 		B79586DD1B83B69500C12DBE /* CoreDataStackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B79586DC1B83B69500C12DBE /* CoreDataStackManager.swift */; };
+		B79586E11B84E2E800C12DBE /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B79586E01B84E2E800C12DBE /* Pin.swift */; };
 		B7EF20F81B7ADDFA004942B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7EF20F71B7ADDFA004942B7 /* AppDelegate.swift */; };
-		B7EF20FB1B7ADDFA004942B7 /* VirtualTourist.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B7EF20F91B7ADDFA004942B7 /* VirtualTourist.xcdatamodeld */; };
 		B7EF20FD1B7ADDFA004942B7 /* TravelLocationsMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7EF20FC1B7ADDFA004942B7 /* TravelLocationsMapViewController.swift */; };
 		B7EF21001B7ADDFA004942B7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B7EF20FE1B7ADDFA004942B7 /* Main.storyboard */; };
 		B7EF21021B7ADDFA004942B7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B7EF21011B7ADDFA004942B7 /* Images.xcassets */; };
@@ -32,10 +32,10 @@
 /* Begin PBXFileReference section */
 		B79586DA1B83B66B00C12DBE /* PinModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PinModel.xcdatamodel; sourceTree = "<group>"; };
 		B79586DC1B83B69500C12DBE /* CoreDataStackManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStackManager.swift; sourceTree = "<group>"; };
+		B79586E01B84E2E800C12DBE /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
 		B7EF20F21B7ADDFA004942B7 /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7EF20F61B7ADDFA004942B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B7EF20F71B7ADDFA004942B7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		B7EF20FA1B7ADDFA004942B7 /* VirtualTourist.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = VirtualTourist.xcdatamodel; sourceTree = "<group>"; };
 		B7EF20FC1B7ADDFA004942B7 /* TravelLocationsMapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelLocationsMapViewController.swift; sourceTree = "<group>"; };
 		B7EF20FF1B7ADDFA004942B7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B7EF21011B7ADDFA004942B7 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -69,6 +69,7 @@
 			children = (
 				B79586D91B83B66B00C12DBE /* PinModel.xcdatamodeld */,
 				B79586DC1B83B69500C12DBE /* CoreDataStackManager.swift */,
+				B79586E01B84E2E800C12DBE /* Pin.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -99,7 +100,6 @@
 				B7EF20F71B7ADDFA004942B7 /* AppDelegate.swift */,
 				B7EF21011B7ADDFA004942B7 /* Images.xcassets */,
 				B7EF21031B7ADDFA004942B7 /* LaunchScreen.xib */,
-				B7EF20F91B7ADDFA004942B7 /* VirtualTourist.xcdatamodeld */,
 				B7EF20F51B7ADDFA004942B7 /* Supporting Files */,
 			);
 			path = VirtualTourist;
@@ -240,8 +240,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B79586E11B84E2E800C12DBE /* Pin.swift in Sources */,
 				B7EF20FD1B7ADDFA004942B7 /* TravelLocationsMapViewController.swift in Sources */,
-				B7EF20FB1B7ADDFA004942B7 /* VirtualTourist.xcdatamodeld in Sources */,
 				B79586DB1B83B66B00C12DBE /* PinModel.xcdatamodeld in Sources */,
 				B7EF20F81B7ADDFA004942B7 /* AppDelegate.swift in Sources */,
 				B7EF211C1B7ADE94004942B7 /* PhotoAlbumViewController.swift in Sources */,
@@ -462,16 +462,6 @@
 			);
 			currentVersion = B79586DA1B83B66B00C12DBE /* PinModel.xcdatamodel */;
 			path = PinModel.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-		B7EF20F91B7ADDFA004942B7 /* VirtualTourist.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				B7EF20FA1B7ADDFA004942B7 /* VirtualTourist.xcdatamodel */,
-			);
-			currentVersion = B7EF20FA1B7ADDFA004942B7 /* VirtualTourist.xcdatamodel */;
-			path = VirtualTourist.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};
