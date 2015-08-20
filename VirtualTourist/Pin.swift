@@ -12,7 +12,6 @@ import MapKit
 
 @objc(Pin)
 
-
 //class to persist annotations
 class Pin: NSManagedObject, MKAnnotation {
     

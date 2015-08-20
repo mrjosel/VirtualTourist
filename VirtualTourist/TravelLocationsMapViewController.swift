@@ -10,18 +10,15 @@ import UIKit
 import MapKit
 import CoreData
 
-//@objc(Pin)
 
-class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate {
+
+class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate, NSFetchedResultsControllerDelegate {
     
     //Map View
     @IBOutlet weak var mapView: MKMapView!
     
     //gesture for dropping pin
     var pinDropGesture : UILongPressGestureRecognizer?
-    
-    //annotations array
-//    var annotations = [MKPointAnnotation]()
     
     //shared context
     lazy var sharedContext: NSManagedObjectContext = {
@@ -35,7 +32,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         
         //create fetch request with sort descriptor
         let fetchRequest = NSFetchRequest(entityName: "Pin")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true), NSSortDescriptor(key: "longitude", ascending: true)]
         
         //create controller from fetch request
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
@@ -47,13 +44,14 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        //set delegates
-        self.mapView.delegate = self
-        self.fetchedResultsController.delegate = self
-        
         //set up pinDrop mechanism, make vc delegate
         self.pinDropGesture = UILongPressGestureRecognizer(target: self, action: "dropPin:")
         self.mapView.addGestureRecognizer(self.pinDropGesture!)
+        
+        //set delegates
+        self.mapView.delegate = self
+        self.fetchedResultsController.delegate = self
+        self.pinDropGesture!.delegate = self
         
         //perform fetch
         self.fetchedResultsController.performFetch(nil)
@@ -63,6 +61,27 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         
     }
     
+//    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
+//        
+//        //create coordinate object point object
+//        let point = touches.locationInView(self.mapView)
+//        let coordinates = self.mapView.convertPoint(point, toCoordinateFromView: self.mapView)
+//        
+//        //create annotation
+//        var dropPin = MKPointAnnotation()
+//        dropPin.coordinate = coordinates
+//        
+//        //add annotation to map
+//        self.mapView.addAnnotation(dropPin)
+//        
+//        //create Pin object
+//        let pinToBeAdded = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
+//    }
+//    
+//    override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
+//        CoreDataStackManager.sharedInstance().saveContext()
+//    }
+    
     //add pin to array and to map
     func dropPin(sender: UIGestureRecognizer) {
 
@@ -71,10 +90,11 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         let coordinates = self.mapView.convertPoint(point, toCoordinateFromView: self.mapView)
         
         //only allow pins to be dropped once, not checking state place pins indefinitely
-        if sender.state == UIGestureRecognizerState.Began {
-//            //create annotation
-//            var dropPin = MKPointAnnotation()
-//            dropPin.coordinate = coordinates
+        if sender.state == .Began {
+            
+            //create annotation
+            var dropPin = MKPointAnnotation()
+            dropPin.coordinate = coordinates
             
             //create Pin object
             let pinToBeAdded = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
@@ -121,12 +141,13 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         //reuseID and pinView
         let reuseID = "pin"
         var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseID) as? MKPinAnnotationView
-        
+        let gesture = mapView.gestureRecognizers![0] as! UILongPressGestureRecognizer
         //if no pinView, then create one
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseID)
             pinView!.animatesDrop = true
             pinView!.draggable = true
+
         } else {
             //otherwise, add annotation
             pinView!.annotation = annotation
@@ -139,6 +160,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         
         println("drag state changed")
         //TODO: ADD INDEXING TO PIN OBJECTS
+        
         CoreDataStackManager.sharedInstance().saveContext()
     }
     
