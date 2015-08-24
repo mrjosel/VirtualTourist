@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vXZ-lx-hvc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="e6e-em-jp4">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
@@ -32,11 +32,12 @@
                     <navigationItem key="navigationItem" id="Adn-0H-OH9"/>
                     <connections>
                         <outlet property="mapView" destination="PZq-GM-jc4" id="aZU-bu-vqe"/>
+                        <segue destination="n5s-yL-38X" kind="show" identifier="photoAlbumVCSegue" id="3Ey-sA-ym5"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1526" y="192"/>
+            <point key="canvasLocation" x="3150" y="192"/>
         </scene>
         <!--Photo Album View Controller-->
         <scene sceneID="F6f-Qx-zGb">
@@ -51,7 +52,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="UUw-le-ONR">
-                                <rect key="frame" x="0.0" y="64" width="600" height="146"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="210"/>
                             </mapView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="9Bh-hs-1Ti">
                                 <rect key="frame" x="0.0" y="209" width="600" height="391"/>
@@ -73,38 +74,46 @@
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
-                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="V8I-Gs-WWp">
-                                <rect key="frame" x="0.0" y="20" width="600" height="44"/>
-                                <items>
-                                    <navigationItem title="Title" id="UJd-0j-NUv"/>
-                                </items>
-                            </navigationBar>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="trailingMargin" secondItem="V8I-Gs-WWp" secondAttribute="trailing" constant="-16" id="3Rq-ap-ihZ"/>
+                            <constraint firstItem="UUw-le-ONR" firstAttribute="top" secondItem="ygH-5J-L2c" secondAttribute="topMargin" id="3I6-g7-P28"/>
                             <constraint firstItem="9Bh-hs-1Ti" firstAttribute="top" secondItem="pqE-qx-2Bp" secondAttribute="bottom" constant="189" id="5mQ-no-tMj"/>
                             <constraint firstItem="9Bh-hs-1Ti" firstAttribute="leading" secondItem="ygH-5J-L2c" secondAttribute="leadingMargin" constant="-16" id="5tQ-L0-rcx"/>
                             <constraint firstItem="02l-6z-puO" firstAttribute="top" secondItem="9Bh-hs-1Ti" secondAttribute="bottom" id="GV4-hV-eJX"/>
                             <constraint firstItem="UUw-le-ONR" firstAttribute="leading" secondItem="ygH-5J-L2c" secondAttribute="leadingMargin" constant="-16" id="Iuv-xt-IBB"/>
-                            <constraint firstItem="UUw-le-ONR" firstAttribute="top" secondItem="pqE-qx-2Bp" secondAttribute="bottom" constant="44" id="Y8I-fm-Ge9"/>
                             <constraint firstItem="02l-6z-puO" firstAttribute="top" secondItem="UUw-le-ONR" secondAttribute="bottom" constant="390" id="Zwx-wb-2kE"/>
-                            <constraint firstItem="V8I-Gs-WWp" firstAttribute="top" secondItem="ygH-5J-L2c" secondAttribute="topMargin" constant="20" id="cvb-xj-pBu"/>
                             <constraint firstAttribute="trailingMargin" secondItem="UUw-le-ONR" secondAttribute="trailing" constant="-16" id="pbd-jf-qaG"/>
                             <constraint firstAttribute="trailingMargin" secondItem="9Bh-hs-1Ti" secondAttribute="trailing" constant="-16" id="sCy-DC-OaZ"/>
-                            <constraint firstItem="V8I-Gs-WWp" firstAttribute="leading" secondItem="ygH-5J-L2c" secondAttribute="leadingMargin" constant="-16" id="xEQ-kI-yq0"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="4w0-U1-Nfn"/>
                     <connections>
                         <outlet property="mapView" destination="UUw-le-ONR" id="RHr-64-UmA"/>
-                        <outlet property="navBar" destination="V8I-Gs-WWp" id="SHh-zk-0WG"/>
                         <outlet property="photoCollectionView" destination="9Bh-hs-1Ti" id="BT0-WP-dIw"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wi1-jh-fuK" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2132" y="1006"/>
+            <point key="canvasLocation" x="3920" y="192"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="fFu-OM-DF2">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="e6e-em-jp4" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="h2e-zk-ddy">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="vXZ-lx-hvc" kind="relationship" relationship="rootViewController" id="6cV-c6-o3b"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="8TY-6b-1jr" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2338" y="192"/>
         </scene>
     </scenes>
 </document>

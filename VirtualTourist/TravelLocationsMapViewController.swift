@@ -12,7 +12,7 @@ import CoreData
 
 
 
-class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate, NSFetchedResultsControllerDelegate {
+class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate {
     
     //Map View
     @IBOutlet weak var mapView: MKMapView!
@@ -40,6 +40,14 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, UIG
         return fetchedResultsController
         }()
     
+    override func viewWillAppear(animated: Bool) {
+        //always hide navBar
+        self.navigationController?.navigationBar.hidden = true
+        
+        //super
+        super.viewWillAppear(animated)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -51,7 +59,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, UIG
         //set delegates
         self.mapView.delegate = self
         self.fetchedResultsController.delegate = self
-        self.pinDropGesture!.delegate = self
         
         //perform fetch
         self.fetchedResultsController.performFetch(nil)
@@ -60,27 +67,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, UIG
         self.getAnnotations()
         
     }
-    
-//    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
-//        
-//        //create coordinate object point object
-//        let point = touches.locationInView(self.mapView)
-//        let coordinates = self.mapView.convertPoint(point, toCoordinateFromView: self.mapView)
-//        
-//        //create annotation
-//        var dropPin = MKPointAnnotation()
-//        dropPin.coordinate = coordinates
-//        
-//        //add annotation to map
-//        self.mapView.addAnnotation(dropPin)
-//        
-//        //create Pin object
-//        let pinToBeAdded = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
-//    }
-//    
-//    override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
-//        CoreDataStackManager.sharedInstance().saveContext()
-//    }
     
     //add pin to array and to map
     func dropPin(sender: UIGestureRecognizer) {
@@ -132,8 +118,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, UIG
         }
     }
     
-    
-    
     //create view for annotations
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
         //TODO: FIX RADIUS BUG
@@ -156,14 +140,20 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, UIG
         return pinView
     }
     
-    func mapView(mapView: MKMapView!, annotationView view: MKAnnotationView!, didChangeDragState newState: MKAnnotationViewDragState, fromOldState oldState: MKAnnotationViewDragState) {
+    func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
+        //perform segue when pin is selected
+        self.performSegueWithIdentifier("photoAlbumVCSegue", sender: view)
         
-        println("drag state changed")
-        //TODO: ADD INDEXING TO PIN OBJECTS
-        
-        CoreDataStackManager.sharedInstance().saveContext()
     }
     
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        let view = sender as! MKAnnotationView
+        
+        if segue.identifier == "photoAlbumVCSegue" {
+            let photoAlbumVC = self.storyboard?.instantiateViewControllerWithIdentifier("PhotoAlbumViewController") as! PhotoAlbumViewController
+            photoAlbumVC.coordinate = view.annotation.coordinate
+        }
+    }
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
         
@@ -194,15 +184,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, UIG
         }
         
     }
-    
-    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
-        
-    }
-    
-    
-//    func controllerDidChangeContent(controller: NSFetchedResultsController) {
-//        UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-//    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
