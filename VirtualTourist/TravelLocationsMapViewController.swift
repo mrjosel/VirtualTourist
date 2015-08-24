@@ -147,12 +147,18 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        let mkView = sender as! MKAnnotationView
-        let coordinate = mkView.annotation.coordinate
+        
+        //cast sender as MKAnnotationView, get coordinate from sender
+        let selectedPin = sender as! MKAnnotationView
+        
+        //prepare segue, get VC and pass coordinate
         if segue.identifier == "photoAlbumVCSegue" {
             let photoAlbumVC = segue.destinationViewController as! PhotoAlbumViewController
-            photoAlbumVC.coordinate = coordinate
+            photoAlbumVC.selectedPin = selectedPin
         }
+        
+        //super
+        super.prepareForSegue(segue, sender: sender)
     }
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {

@@ -9,15 +9,18 @@
 import UIKit
 import MapKit
 
-class PhotoAlbumViewController: UIViewController {
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
 
     //outlets
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var photoCollectionView: UICollectionView!
     @IBOutlet weak var navBar: UINavigationBar!
+    @IBOutlet weak var toolbar: UIToolbar!
+    @IBOutlet weak var newCollectionButton: UIBarButtonItem!
+    
     
     //variables
-    var coordinate: CLLocationCoordinate2D!
+    var selectedPin: MKAnnotationView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,13 +30,19 @@ class PhotoAlbumViewController: UIViewController {
         //show navBar
         self.navigationController?.navigationBar.hidden = false
         
+        //setup mapview
+        self.mapView.delegate = self
+        self.mapView.addAnnotation(selectedPin.annotation)
+        self.mapView.zoomEnabled = true
+        let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin.annotation.coordinate, 50000, 50000)
+        self.mapView.setRegion(mapWindow, animated: true)
+        
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
 
     /*
     // MARK: - Navigation

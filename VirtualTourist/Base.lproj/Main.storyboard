@@ -56,8 +56,16 @@
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="UUw-le-ONR">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="210"/>
                             </mapView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ydO-MF-1Xc">
+                                <rect key="frame" x="0.0" y="556" width="600" height="44"/>
+                                <items>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="5xu-ul-xCd"/>
+                                    <barButtonItem title="New Collection" id="B8L-x2-WAa"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="Oz4-pM-rAD"/>
+                                </items>
+                            </toolbar>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="9Bh-hs-1Ti">
-                                <rect key="frame" x="0.0" y="209" width="600" height="391"/>
+                                <rect key="frame" x="0.0" y="209" width="600" height="347"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="mij-fm-JRe">
                                     <size key="itemSize" width="50" height="50"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -79,20 +87,26 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="02l-6z-puO" firstAttribute="top" secondItem="ydO-MF-1Xc" secondAttribute="bottom" id="1xR-we-WQR"/>
                             <constraint firstItem="UUw-le-ONR" firstAttribute="top" secondItem="ygH-5J-L2c" secondAttribute="topMargin" id="3I6-g7-P28"/>
-                            <constraint firstItem="9Bh-hs-1Ti" firstAttribute="top" secondItem="pqE-qx-2Bp" secondAttribute="bottom" constant="189" id="5mQ-no-tMj"/>
+                            <constraint firstItem="9Bh-hs-1Ti" firstAttribute="top" secondItem="pqE-qx-2Bp" secondAttribute="bottom" constant="145" id="5mQ-no-tMj"/>
                             <constraint firstItem="9Bh-hs-1Ti" firstAttribute="leading" secondItem="ygH-5J-L2c" secondAttribute="leadingMargin" constant="-16" id="5tQ-L0-rcx"/>
-                            <constraint firstItem="02l-6z-puO" firstAttribute="top" secondItem="9Bh-hs-1Ti" secondAttribute="bottom" id="GV4-hV-eJX"/>
                             <constraint firstItem="UUw-le-ONR" firstAttribute="leading" secondItem="ygH-5J-L2c" secondAttribute="leadingMargin" constant="-16" id="Iuv-xt-IBB"/>
+                            <constraint firstItem="ydO-MF-1Xc" firstAttribute="top" secondItem="9Bh-hs-1Ti" secondAttribute="bottom" id="Z9g-8n-ebY"/>
                             <constraint firstItem="02l-6z-puO" firstAttribute="top" secondItem="UUw-le-ONR" secondAttribute="bottom" constant="390" id="Zwx-wb-2kE"/>
+                            <constraint firstItem="ydO-MF-1Xc" firstAttribute="leading" secondItem="ygH-5J-L2c" secondAttribute="leadingMargin" constant="-16" id="cbW-vq-JJx"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="ydO-MF-1Xc" secondAttribute="trailing" constant="-16" id="hcJ-rg-gdw"/>
                             <constraint firstAttribute="trailingMargin" secondItem="UUw-le-ONR" secondAttribute="trailing" constant="-16" id="pbd-jf-qaG"/>
                             <constraint firstAttribute="trailingMargin" secondItem="9Bh-hs-1Ti" secondAttribute="trailing" constant="-16" id="sCy-DC-OaZ"/>
+                            <constraint firstItem="ydO-MF-1Xc" firstAttribute="top" secondItem="9Bh-hs-1Ti" secondAttribute="bottom" id="wKx-KZ-fe5"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="4w0-U1-Nfn"/>
                     <connections>
                         <outlet property="mapView" destination="UUw-le-ONR" id="RHr-64-UmA"/>
+                        <outlet property="newCollectionButton" destination="B8L-x2-WAa" id="070-c6-RuC"/>
                         <outlet property="photoCollectionView" destination="9Bh-hs-1Ti" id="BT0-WP-dIw"/>
+                        <outlet property="toolbar" destination="ydO-MF-1Xc" id="7Ft-6z-yZr"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wi1-jh-fuK" userLabel="First Responder" sceneMemberID="firstResponder"/>
