@@ -29,7 +29,9 @@
                             <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="PZq-GM-jc4" secondAttribute="bottom" id="wFN-wz-UXh"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="Adn-0H-OH9"/>
+                    <navigationItem key="navigationItem" id="Adn-0H-OH9">
+                        <barButtonItem key="backBarButtonItem" title="OK" id="g4D-Iu-89w"/>
+                    </navigationItem>
                     <connections>
                         <outlet property="mapView" destination="PZq-GM-jc4" id="aZU-bu-vqe"/>
                         <segue destination="n5s-yL-38X" kind="show" identifier="photoAlbumVCSegue" id="3Ey-sA-ym5"/>

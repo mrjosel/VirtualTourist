@@ -17,14 +17,13 @@ class PhotoAlbumViewController: UIViewController {
     @IBOutlet weak var navBar: UINavigationBar!
     
     //variables
-    var coordinate: CLLocationCoordinate2D?
+    var coordinate: CLLocationCoordinate2D!
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
         
-//        self.navBar.frame = CGRect(x: 0, y: 0, width: 600, height: 64)
         //show navBar
         self.navigationController?.navigationBar.hidden = false
         

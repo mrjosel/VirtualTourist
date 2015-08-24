@@ -147,11 +147,11 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        let view = sender as! MKAnnotationView
-        
+        let mkView = sender as! MKAnnotationView
+        let coordinate = mkView.annotation.coordinate
         if segue.identifier == "photoAlbumVCSegue" {
-            let photoAlbumVC = self.storyboard?.instantiateViewControllerWithIdentifier("PhotoAlbumViewController") as! PhotoAlbumViewController
-            photoAlbumVC.coordinate = view.annotation.coordinate
+            let photoAlbumVC = segue.destinationViewController as! PhotoAlbumViewController
+            photoAlbumVC.coordinate = coordinate
         }
     }
     
