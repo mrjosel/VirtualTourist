@@ -33,7 +33,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
         //setup mapview
         self.mapView.delegate = self
         self.mapView.addAnnotation(selectedPin.annotation)
-        self.mapView.zoomEnabled = true
+        self.mapView.zoomEnabled = false
+        self.mapView.scrollEnabled = false
+        self.mapView.userInteractionEnabled = false
         let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin.annotation.coordinate, 50000, 50000)
         self.mapView.setRegion(mapWindow, animated: true)
         
