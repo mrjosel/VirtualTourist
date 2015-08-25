@@ -130,7 +130,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseID)
             pinView!.animatesDrop = true
-            pinView!.draggable = true
+            pinView!.draggable = false
 
         } else {
             //otherwise, add annotation
