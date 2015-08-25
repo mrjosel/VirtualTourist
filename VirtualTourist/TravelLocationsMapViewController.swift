@@ -96,25 +96,25 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         //get array of objects from fetchResultsController
         let sectionInfo = self.fetchedResultsController.sections![0] as! NSFetchedResultsSectionInfo
         
-        //TODO: WRAP FOR LOOP IN IF != 0 STATEMENT 
-        if sectionInfo.numberOfObjects == 0 {
-            println("no objects persisted")
-            return
-        }
+        //don't do unless there are objects
+        if sectionInfo.numberOfObjects != 0 {
         
-        //for each persisted pin object
-        for object in sectionInfo.objects {
-            //get persisted latitude and longitude information
-            let lat = (object as! Pin).latitude as! Double
-            let lon = (object as! Pin).longitude as! Double
-            
-            //create coordinate from lat and lon
-            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-            
-            //create annotation, add coordinate, add to map
-            var pin = MKPointAnnotation()
-            pin.coordinate = coordinate
-            self.mapView.addAnnotation(pin)
+            //for each persisted pin object
+            for object in sectionInfo.objects {
+                //get persisted latitude and longitude information
+                let lat = (object as! Pin).latitude as! Double
+                let lon = (object as! Pin).longitude as! Double
+                
+                //create coordinate from lat and lon
+                let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+                
+                //create annotation, add coordinate, add to map
+                var pin = MKPointAnnotation()
+                pin.coordinate = coordinate
+                self.mapView.addAnnotation(pin)
+            }
+        } else {
+            println("no persisted pin objects")
         }
     }
     
