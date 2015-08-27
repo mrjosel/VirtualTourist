@@ -58,7 +58,7 @@ class FlickrClient {
     }
     
     //creates url for GET request
-    class func createURLString(params: [String: AnyObject]) -> String {
+    func createURLString(params: [String: AnyObject]) -> String {
         
         //add params to new array including defaultParams
         var allParams = [String : AnyObject]()
