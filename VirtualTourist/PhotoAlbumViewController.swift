@@ -14,9 +14,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
     //outlets
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var photoCollectionView: UICollectionView!
-    @IBOutlet weak var navBar: UINavigationBar!
     @IBOutlet weak var toolbar: UIToolbar!
     @IBOutlet weak var newCollectionButton: UIBarButtonItem!
+    @IBOutlet weak var noPhotosLabel: UILabel!
     
     
     //variables
@@ -29,6 +29,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
         
         //show navBar
         self.navigationController?.navigationBar.hidden = false
+        
+        //setup collectionView and label
+        self.photoCollectionView.backgroundColor = UIColor.whiteColor()
+        self.noPhotosLabel.hidden = true
         
         //setup mapview
         self.mapView.delegate = self

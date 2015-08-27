@@ -64,6 +64,12 @@
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="Oz4-pM-rAD"/>
                                 </items>
                             </toolbar>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="La9-sy-HBH">
+                                <rect key="frame" x="279" y="352" width="42" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="9Bh-hs-1Ti">
                                 <rect key="frame" x="0.0" y="209" width="600" height="347"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="mij-fm-JRe">
@@ -91,7 +97,9 @@
                             <constraint firstItem="UUw-le-ONR" firstAttribute="top" secondItem="ygH-5J-L2c" secondAttribute="topMargin" id="3I6-g7-P28"/>
                             <constraint firstItem="9Bh-hs-1Ti" firstAttribute="top" secondItem="pqE-qx-2Bp" secondAttribute="bottom" constant="145" id="5mQ-no-tMj"/>
                             <constraint firstItem="9Bh-hs-1Ti" firstAttribute="leading" secondItem="ygH-5J-L2c" secondAttribute="leadingMargin" constant="-16" id="5tQ-L0-rcx"/>
+                            <constraint firstItem="La9-sy-HBH" firstAttribute="top" secondItem="UUw-le-ONR" secondAttribute="bottom" constant="142" id="BqI-tF-18E"/>
                             <constraint firstItem="UUw-le-ONR" firstAttribute="leading" secondItem="ygH-5J-L2c" secondAttribute="leadingMargin" constant="-16" id="Iuv-xt-IBB"/>
+                            <constraint firstAttribute="centerX" secondItem="La9-sy-HBH" secondAttribute="centerX" id="Qbd-uq-GgF"/>
                             <constraint firstItem="ydO-MF-1Xc" firstAttribute="top" secondItem="9Bh-hs-1Ti" secondAttribute="bottom" id="Z9g-8n-ebY"/>
                             <constraint firstItem="02l-6z-puO" firstAttribute="top" secondItem="UUw-le-ONR" secondAttribute="bottom" constant="390" id="Zwx-wb-2kE"/>
                             <constraint firstItem="ydO-MF-1Xc" firstAttribute="leading" secondItem="ygH-5J-L2c" secondAttribute="leadingMargin" constant="-16" id="cbW-vq-JJx"/>
@@ -105,6 +113,7 @@
                     <connections>
                         <outlet property="mapView" destination="UUw-le-ONR" id="RHr-64-UmA"/>
                         <outlet property="newCollectionButton" destination="B8L-x2-WAa" id="070-c6-RuC"/>
+                        <outlet property="noPhotosLabel" destination="La9-sy-HBH" id="nAc-M0-ag2"/>
                         <outlet property="photoCollectionView" destination="9Bh-hs-1Ti" id="BT0-WP-dIw"/>
                         <outlet property="toolbar" destination="ydO-MF-1Xc" id="7Ft-6z-yZr"/>
                     </connections>
