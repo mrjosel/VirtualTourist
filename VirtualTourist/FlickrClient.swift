@@ -87,4 +87,12 @@ class FlickrClient {
         //add rest request and paramString to url and return
         return urlString + "/" + FlickrClient.Request.REST + "/?" + urlAppendix
     }
+    
+    //Singleton
+    class func sharedInstance() -> FlickrClient {
+        struct Singleton {
+            static let sharedInstace = FlickrClient()
+        }
+        return Singleton.sharedInstace
+    }
 }
