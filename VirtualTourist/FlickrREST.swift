@@ -27,9 +27,11 @@ extension FlickrClient {
         let task = session.dataTaskWithRequest(request) { data, response, error in
             //complete with error if request fails
             if let error = error {
+                println("GET request error")
                 completionHandler(sucess: false, result: nil, error: error)
             } else {
                 //successful request
+                println("successful GET request")
                 self.parseJSON(data, completionHandler: completionHandler)
             }
         }
@@ -49,9 +51,11 @@ extension FlickrClient {
         //check for error
         if let error = error {
             //complete with error
+            println("JSON parsing error")
             completionHandler(success: false, result: nil, error: error)
         } else {
             //complete with parsed JSON
+            println("successfully parsed JSON")
             completionHandler(success: true, result: parsedJSON, error: nil)
         }
     }

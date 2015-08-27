@@ -51,6 +51,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
         let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin.annotation.coordinate, 50000, 50000)
         self.mapView.setRegion(mapWindow, animated: true)
         
+        //get photos
+        self.getPhotos(self.selectedPin)
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -64,16 +67,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
         FlickrClient.sharedInstance().getPhotoURLs(pin, page: self.page, per_page: self.perPage) { success, result, error in
             if !success {
                 //TODO: Make Alert function
+                println("couldn't get photo urls")
             } else {
                 //retrieved photoURLs
                 self.photoURLs = result!
+                println(self.photoURLs!)
             }
         }
-
-        
-
-
-        
+        //TODO: NEED MAX PAGES VARIABLE
         //increment page in case newCollectionButton is pressed, roll back to page 1 if maxPage is reached
         if page < maxPages {
             page++

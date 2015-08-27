@@ -23,7 +23,7 @@ extension FlickrClient {
         
         
         for (key, val) in params {
-            allParams[key] = (val as! String)
+            allParams[key] = val
         }
         
         
@@ -65,12 +65,27 @@ extension FlickrClient {
         let task = FlickrClient.sharedInstance().taskForGETRequest(urlString) {success, result, error in
             //if error, complete with error
             if let error = error {
+                println("error in getPhotos GET request")
                 completionHandler(success: false, result: nil, error: error)
             } else {
+                println("successful GET request in getPhotos")
                 //get array of urlStrings for photos in result
-                if let parsedJSON = result as? [[String: AnyObject]] {
-                    let photoURLstrings = self.makePhotoURLs(parsedJSON)
-                    completionHandler(success: true, result: photoURLstrings, error: nil)
+                if let parsedJSON = result as? [String: AnyObject] {
+                    println("successfully casted JSON to [[String: AnyObject]]")
+                    if let photosDict = parsedJSON[FlickrClient.Response.PHOTOS] as? [String: AnyObject] {
+                        println("successfully retrieved photosDict as [String: AnyObject]")
+                        if let photosArray = photosDict[FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
+                            let photoURLstrings = self.makePhotoURLs(photosArray)
+                            completionHandler(success: true, result: photoURLstrings, error: nil)
+                        } else {
+                            println("failed to retrieve photosArray")
+                            completionHandler(success: false, result: nil, error: NSError(domain: "retrieving photosDict", code: 999, userInfo: nil))
+                        }
+                    } else {
+                        //failed to cast photosDict
+                        println("failed to cast photosDict")
+                        completionHandler(success: false, result: nil, error: NSError(domain: "casting photoDict", code: 999, userInfo: nil))
+                    }
                 } else {
                     //casting of result to [[String: AnyObject]] failed
                     println("casting of result to [[String: AnyObject]] failed")
@@ -81,7 +96,7 @@ extension FlickrClient {
     }
     
     //makes photo URLs from dictionary of photo data from JSON
-    func makePhotoURLs(photoDict: [[String: AnyObject]]) -> [String] {
+    func makePhotoURLs(photoArray: [[String: AnyObject]]) -> [String] {
         /*******FORMAT OF URL BASED ON DICT KEY/VALS
         
         https://farm1.staticflickr.com/2/1418878_1e92283336_m.jpg
@@ -95,16 +110,17 @@ extension FlickrClient {
         
         //output array of photoURLstrings
         var outputArray = [String]()
-        if photoDict.count > 0 {
-            for photo in photoDict {
+        if photoArray.count > 0 {
+            for photo in photoArray {
                 //get params for URL
-                let farm_id = photo[FlickrClient.Response.FARM] as! Int
-                let server_id = photo[FlickrClient.Response.SERVER] as! Int
-                let photo_id = photo[FlickrClient.Response.PHOTO] as! Int
+                let farmID = photo[FlickrClient.Response.FARM] as! Int
+                let serverID = photo[FlickrClient.Response.SERVER] as! String
+                let photoID = photo[FlickrClient.Response.ID] as! String
                 let secret = photo[FlickrClient.Response.SECRET] as! String
+                //TODO: WHY DOES CASTINT TO INT ON FARMID WORK BUT NOT ON SERVERID????
                 
                 //construct URLstring
-                let urlString = "https://farm\(farm_id).staticflickr.com/\(server_id)/\(photo_id)_\(secret)_m.jpg"
+                let urlString = "https://farm\(farmID).staticflickr.com/\(serverID)/\(photoID)_\(secret)_m.jpg"
 
                 //append to outputArray
                 outputArray.append(urlString)
