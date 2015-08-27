@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B72790621B8CD383004DBE52 /* FlickrClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72790611B8CD383004DBE52 /* FlickrClient.swift */; };
 		B72790641B8E9C72004DBE52 /* FlickrREST.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72790631B8E9C72004DBE52 /* FlickrREST.swift */; };
+		B72790661B8EA355004DBE52 /* FlickrMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72790651B8EA355004DBE52 /* FlickrMethods.swift */; };
 		B79586DB1B83B66B00C12DBE /* PinModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B79586D91B83B66B00C12DBE /* PinModel.xcdatamodeld */; };
 		B79586DD1B83B69500C12DBE /* CoreDataStackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B79586DC1B83B69500C12DBE /* CoreDataStackManager.swift */; };
 		B79586E11B84E2E800C12DBE /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B79586E01B84E2E800C12DBE /* Pin.swift */; };
@@ -34,6 +35,7 @@
 /* Begin PBXFileReference section */
 		B72790611B8CD383004DBE52 /* FlickrClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlickrClient.swift; sourceTree = "<group>"; };
 		B72790631B8E9C72004DBE52 /* FlickrREST.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlickrREST.swift; sourceTree = "<group>"; };
+		B72790651B8EA355004DBE52 /* FlickrMethods.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlickrMethods.swift; sourceTree = "<group>"; };
 		B79586DA1B83B66B00C12DBE /* PinModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PinModel.xcdatamodel; sourceTree = "<group>"; };
 		B79586DC1B83B69500C12DBE /* CoreDataStackManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStackManager.swift; sourceTree = "<group>"; };
 		B79586E01B84E2E800C12DBE /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 			children = (
 				B72790611B8CD383004DBE52 /* FlickrClient.swift */,
 				B72790631B8E9C72004DBE52 /* FlickrREST.swift */,
+				B72790651B8EA355004DBE52 /* FlickrMethods.swift */,
 			);
 			name = Flickr;
 			sourceTree = "<group>";
@@ -254,6 +257,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B72790661B8EA355004DBE52 /* FlickrMethods.swift in Sources */,
 				B79586E11B84E2E800C12DBE /* Pin.swift in Sources */,
 				B7EF20FD1B7ADDFA004942B7 /* TravelLocationsMapViewController.swift in Sources */,
 				B72790621B8CD383004DBE52 /* FlickrClient.swift in Sources */,

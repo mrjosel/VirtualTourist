@@ -22,6 +22,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
     //variables
     var selectedPin: MKAnnotationView!
     
+    //temp var for URLstrings
+    var photoURLs: [String]?
+    
+    //page and per_page variables
+    var page = 1
+    var perPage = 20
+    var maxPages: Int?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -48,6 +56,30 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    //get photos using pin cooridinate
+    func getPhotos(pin: MKAnnotationView) {
+        //pass pin into FlickrClient
+        FlickrClient.sharedInstance().getPhotoURLs(pin, page: self.page, per_page: self.perPage) { success, result, error in
+            if !success {
+                //TODO: Make Alert function
+            } else {
+                //retrieved photoURLs
+                self.photoURLs = result!
+            }
+        }
+
+        
+
+
+        
+        //increment page in case newCollectionButton is pressed, roll back to page 1 if maxPage is reached
+        if page < maxPages {
+            page++
+        } else {
+            page = 1
+        }
     }
 
     /*

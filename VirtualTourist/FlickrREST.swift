@@ -12,7 +12,7 @@ import Foundation
 extension FlickrClient {
     
     //GET task
-    func taskForGETRequest(urlString: String, completionHandler: (sucess: Bool, result: AnyObject?, error: NSError?) -> Void) {
+    func taskForGETRequest(urlString: String, completionHandler: (sucess: Bool, result: AnyObject?, error: NSError?) -> Void) -> NSURLSessionTask {
         
         //construct URL
         let url = NSURL(string: urlString)
@@ -33,7 +33,8 @@ extension FlickrClient {
                 self.parseJSON(data, completionHandler: completionHandler)
             }
         }
-        
+        task.resume()
+        return task
     }
     
     //JSON parser

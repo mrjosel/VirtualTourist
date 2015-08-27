@@ -27,6 +27,7 @@ class FlickrClient {
     //urls
     struct URLs {
         static let BASE_URL = "https://api.flickr.com/services"
+        static let BASE_PHOTO_URL = ""
     }
     
     //methods
@@ -55,37 +56,14 @@ class FlickrClient {
     struct Response {
         static let JSON = "json"
         static let NO_JSON_CALL_BACK = "1"
-    }
-    
-    //creates url for GET request
-    func createURLString(params: [String: AnyObject]) -> String {
         
-        //add params to new array including defaultParams
-        var allParams = [String : AnyObject]()
-        for (key, val) in FlickrClient.masterParams {
-            allParams[key] = val
-        }
-        
-        
-        for (key, val) in params {
-            allParams[key] = (val as! String)
-        }
-        
-        
-        //output url, starting with BASE_URL
-        var urlString: String = FlickrClient.URLs.BASE_URL
-        
-        //join key/val pairs with "=", make new array
-        var newArray = [String]()
-        for (key, val) in allParams {
-            newArray.append("\(key)=\(val)")
-        }
-        
-        //make urlAppendix by joining newArray items with "&"
-        let urlAppendix = "&".join(newArray)
-        
-        //add rest request and paramString to url and return
-        return urlString + "/" + FlickrClient.Request.REST + "/?" + urlAppendix
+        //keys in response
+        static let PHOTOS = "photos"
+        static let PHOTO = "photo"
+        static let ID = "id"
+        static let FARM = "farm"
+        static let SERVER = "server"
+        static let SECRET = "secret"
     }
     
     //Singleton
