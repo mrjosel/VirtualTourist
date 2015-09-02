@@ -64,6 +64,14 @@ class FlickrClient {
         static let FARM = "farm"
         static let SERVER = "server"
         static let SECRET = "secret"
+        static let PAGES = "pages"
+
+    }
+    
+    //retreived data key
+    struct OutputData {
+        static let URLS = "urls"
+        static let PAGES = "pages"
     }
     
     //Singleton

@@ -11,13 +11,12 @@ import MapKit
 
 class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
 
-    //outlets
+    //Outlets
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var photoCollectionView: UICollectionView!
     @IBOutlet weak var toolbar: UIToolbar!
     @IBOutlet weak var newCollectionButton: UIBarButtonItem!
     @IBOutlet weak var noPhotosLabel: UILabel!
-    
     
     //variables
     var selectedPin: MKAnnotationView!
@@ -70,8 +69,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
                 println("couldn't get photo urls")
             } else {
                 //retrieved photoURLs
-                self.photoURLs = result!
+                self.photoURLs = result![FlickrClient.OutputData.URLS] as? [String]
+                self.maxPages = result![FlickrClient.OutputData.PAGES] as? Int
                 println(self.photoURLs!)
+                println("self.maxPages = \(self.maxPages)")
             }
         }
         //TODO: NEED MAX PAGES VARIABLE
