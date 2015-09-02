@@ -60,7 +60,11 @@
                                 <rect key="frame" x="0.0" y="556" width="600" height="44"/>
                                 <items>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="5xu-ul-xCd"/>
-                                    <barButtonItem title="New Collection" id="B8L-x2-WAa"/>
+                                    <barButtonItem title="New Collection" id="B8L-x2-WAa">
+                                        <connections>
+                                            <action selector="newCollectionButtonPressed:" destination="n5s-yL-38X" id="ytq-5b-57H"/>
+                                        </connections>
+                                    </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="Oz4-pM-rAD"/>
                                 </items>
                             </toolbar>

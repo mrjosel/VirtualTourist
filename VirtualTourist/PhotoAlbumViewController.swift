@@ -9,7 +9,7 @@
 import UIKit
 import MapKit
 
-class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
 
     //Outlets
     @IBOutlet weak var mapView: MKMapView!
@@ -54,6 +54,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
         self.getPhotos(self.selectedPin)
         
     }
+    
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        //TODO: IMPLEMENT COLLECTION VIEW
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -62,6 +66,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
     
     //get photos using pin cooridinate
     func getPhotos(pin: MKAnnotationView) {
+        println("GETTING PHOTOS")
         //pass pin into FlickrClient
         FlickrClient.sharedInstance().getPhotoURLs(pin, page: self.page, per_page: self.perPage) { success, result, error in
             if !success {
@@ -71,19 +76,26 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
                 //retrieved photoURLs
                 self.photoURLs = result![FlickrClient.OutputData.URLS] as? [String]
                 self.maxPages = result![FlickrClient.OutputData.PAGES] as? Int
-                println(self.photoURLs!)
-                println("self.maxPages = \(self.maxPages)")
             }
-        }
-        //TODO: NEED MAX PAGES VARIABLE
-        //increment page in case newCollectionButton is pressed, roll back to page 1 if maxPage is reached
-        if page < maxPages {
-            page++
-        } else {
-            page = 1
         }
     }
 
+    //grabs new collection of photos by incrementing page
+    //TODO: RANDOMIZE PAGE AND NUMBER OF PHOTOS TO GRAB
+    @IBAction func newCollectionButtonPressed(sender: UIBarButtonItem) {
+        //increment page in case newCollectionButton is pressed, roll back to page 1 if maxPage is reached
+        if self.page < self.maxPages {
+            println("lol")
+            self.page++
+        } else {
+            println("wut")
+            self.page = 1
+        }
+        self.getPhotos(self.selectedPin)
+
+    }
+    
+    
     /*
     // MARK: - Navigation
 

@@ -50,9 +50,6 @@ extension FlickrClient {
         let lat = pin.annotation.coordinate.latitude
         let lon = pin.annotation.coordinate.longitude
         
-        println("lat = \(lat)")
-        println("lon = \(lon)")
-        
         //create params for Flickr GET method
         let params : [String: AnyObject] = [
             FlickrClient.Params.LAT : lat,
@@ -63,8 +60,8 @@ extension FlickrClient {
         
         //make urlString for request, attempt request
         let urlString = FlickrClient.sharedInstance().createURLString(params)
-        println("urlString = \(urlString)")
         
+        println("beginning GET request")
         //invoke GET method
         let task = FlickrClient.sharedInstance().taskForGETRequest(urlString) {success, result, error in
             //if error, complete with error
