@@ -140,19 +140,34 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         return pinView
     }
     
+    //perform the following when pin is selected
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
-        //perform segue when pin is selected
-        self.performSegueWithIdentifier("photoAlbumVCSegue", sender: view)
-        
+        //get photoURLs
+        self.getPhotos(view, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage) { success in
+            //perform segue if successful
+            if success {
+                println("got photos, segueing to next VC")
+                dispatch_async(dispatch_get_main_queue(), {
+                    self.performSegueWithIdentifier("photoAlbumVCSegue", sender: view)
+                })
+            } else {
+                //alert user to error
+                println("failed to get all photos")
+                //TODO: MAKE ALERT FUNCTION
+            }
+        }
+
     }
     
+    //preparing segues
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        
-        //cast sender as MKAnnotationView, get coordinate from sender
-        let selectedPin = sender as! MKAnnotationView
-        
+        println("preparing segue")
         //prepare segue, get VC and pass coordinate
         if segue.identifier == "photoAlbumVCSegue" {
+            
+            //cast sender as MKAnnotationView, get coordinate from sender
+            let selectedPin = sender as! MKAnnotationView
+            
             let photoAlbumVC = segue.destinationViewController as! PhotoAlbumViewController
             photoAlbumVC.selectedPin = selectedPin
         }
