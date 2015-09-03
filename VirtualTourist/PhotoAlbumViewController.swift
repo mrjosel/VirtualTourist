@@ -9,7 +9,7 @@
 import UIKit
 import MapKit
 
-class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {//, UICollectionViewDataSource {
 
     //Outlets
     @IBOutlet weak var mapView: MKMapView!
@@ -24,10 +24,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     //temp var for URLstrings
     var photoURLs: [String]?
     
-    //page and per_page variables
-    var page = 1
-    var perPage = 20
-    var maxPages: Int?
+//    //page and perPage variables
+//    var page = 1
+//    var perPage = 20
+//    var maxPages: Int?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,6 +41,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         self.photoCollectionView.backgroundColor = UIColor.whiteColor()
         self.noPhotosLabel.hidden = true
         
+//        //set datasource
+//        self.photoCollectionView.dataSource = self
+        
         //setup mapview
         self.mapView.delegate = self
         self.mapView.addAnnotation(selectedPin.annotation)
@@ -51,47 +54,69 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         self.mapView.setRegion(mapWindow, animated: true)
         
         //get photos
-        self.getPhotos(self.selectedPin)
+        self.getPhotos(self.selectedPin, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage)
         
     }
     
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        //TODO: IMPLEMENT COLLECTION VIEW
-    }
+//    //gets size for collectionView
+//    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+//        println("self.photoURLs = \(self.photoURLs)")
+//        //TODO:  REFACTOR TO GRAB PHOTOS IN MAPVC
+//        return self.photoURLs!.count
+//    }
+//    
+//    func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
+//        //TODO: IMPLEMENT COLLECTION VIEW
+//    }
+//    
+//    //cell to be populated
+//    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+//        
+//        //create cell
+//        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCollectionCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
+//        
+//        //get image at url in array
+//        cell.cellImageView.image = UIImage(contentsOfFile: self.photoURLs![indexPath.row])
+//        
+//        return cell
+//    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
-    //get photos using pin cooridinate
-    func getPhotos(pin: MKAnnotationView) {
-        println("GETTING PHOTOS")
-        //pass pin into FlickrClient
-        FlickrClient.sharedInstance().getPhotoURLs(pin, page: self.page, per_page: self.perPage) { success, result, error in
-            if !success {
-                //TODO: Make Alert function
-                println("couldn't get photo urls")
-            } else {
-                //retrieved photoURLs
-                self.photoURLs = result![FlickrClient.OutputData.URLS] as? [String]
-                self.maxPages = result![FlickrClient.OutputData.PAGES] as? Int
-            }
-        }
-    }
+//    //get photos using pin cooridinate
+//    func getPhotos(pin: MKAnnotationView) {
+//        println("GETTING PHOTOS")
+//        //pass pin into FlickrClient
+//        FlickrClient.sharedInstance().getPhotoURLs(pin, page: self.page, perPage: self.perPage) { success, result, error in
+//            if !success {
+//                //TODO: Make Alert function
+//                println("couldn't get photo urls")
+//            } else {
+//                //retrieved photoURLs
+//                self.photoURLs = result![FlickrClient.OutputData.URLS] as? [String]
+//                self.maxPages = result![FlickrClient.OutputData.PAGES] as? Int
+//            }
+//        }
+//    }
 
     //grabs new collection of photos by incrementing page
     //TODO: RANDOMIZE PAGE AND NUMBER OF PHOTOS TO GRAB
     @IBAction func newCollectionButtonPressed(sender: UIBarButtonItem) {
         //increment page in case newCollectionButton is pressed, roll back to page 1 if maxPage is reached
-        if self.page < self.maxPages {
+//        if self.page < self.maxPages {
+        if FlickrClient.sharedInstance().page < FlickrClient.sharedInstance().maxPages {
             println("lol")
-            self.page++
+            FlickrClient.sharedInstance().page++
+//            self.page++
         } else {
             println("wut")
-            self.page = 1
+//            self.page = 1
+            FlickrClient.sharedInstance().page = 1
         }
-        self.getPhotos(self.selectedPin)
+        self.getPhotos(self.selectedPin, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage)
 
     }
     

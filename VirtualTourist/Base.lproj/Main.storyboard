@@ -83,14 +83,28 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCollectionCell" id="fhR-ys-7fj">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCollectionCell" id="fhR-ys-7fj" customClass="PhotoCollectionViewCell" customModule="VirtualTourist" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                             <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                             <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Q02-85-hc8">
+                                                    <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                                </imageView>
+                                            </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
+                                        <constraints>
+                                            <constraint firstAttribute="bottomMargin" secondItem="Q02-85-hc8" secondAttribute="bottom" constant="-8" id="336-P2-MfQ"/>
+                                            <constraint firstAttribute="trailingMargin" secondItem="Q02-85-hc8" secondAttribute="trailing" constant="-8" id="WIk-QS-XhN"/>
+                                            <constraint firstItem="Q02-85-hc8" firstAttribute="leading" secondItem="fhR-ys-7fj" secondAttribute="leadingMargin" constant="-8" id="q1o-6Y-vLy"/>
+                                            <constraint firstItem="Q02-85-hc8" firstAttribute="top" secondItem="fhR-ys-7fj" secondAttribute="topMargin" constant="-8" id="xzS-jL-Sya"/>
+                                        </constraints>
+                                        <connections>
+                                            <outlet property="cellImageView" destination="Q02-85-hc8" id="Xiv-va-G0M"/>
+                                        </connections>
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>

@@ -11,6 +11,14 @@ import Foundation
 //class for managing all Flickr activity
 class FlickrClient {
     
+    //page and perPage variables
+    var page = 1
+    var perPage = 20
+    var maxPages: Int?
+    
+    //photoURLs TO BE REMOVED AFTER CORE DATA IMPLEMENTATION
+    var photoURLs = [String]()
+    
     static let masterParams = [
         FlickrClient.Params.API : FlickrClient.Keys.API_KEY,
         FlickrClient.Params.METHOD : FlickrClient.Methods.SEARCH,
