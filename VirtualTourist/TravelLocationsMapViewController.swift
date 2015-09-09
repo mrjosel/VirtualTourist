@@ -143,6 +143,9 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     //perform the following when pin is selected
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
         //get photoURLs
+        
+        println("selected annotation")
+        
         self.getPhotos(view, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage) { success in
             //perform segue if successful
             if success {

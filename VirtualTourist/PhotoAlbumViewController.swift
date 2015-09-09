@@ -9,7 +9,7 @@
 import UIKit
 import MapKit
 
-class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDataSource {
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
 
     //Outlets
     @IBOutlet weak var mapView: MKMapView!
@@ -35,6 +35,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
         //set datasource
         self.photoCollectionView.dataSource = self
+        self.photoCollectionView.delegate = self
         
         //setup mapview
         self.mapView.delegate = self
