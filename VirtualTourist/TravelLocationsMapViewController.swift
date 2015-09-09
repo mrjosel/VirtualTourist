@@ -159,7 +159,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
                 //TODO: MAKE ALERT FUNCTION
             }
         }
-
     }
     
     //preparing segues

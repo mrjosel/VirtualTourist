@@ -21,6 +21,13 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     //variables
     var selectedPin: MKAnnotationView!
     
+    override func viewWillAppear(animated: Bool) {
+        //reload data at every appearance
+        self.photoCollectionView.reloadData()
+        super.viewWillAppear(animated)
+    }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -63,10 +70,15 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
         //create cell
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCollectionCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCollectionViewCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
         
-        //get image at url in array
-        cell.cellImageView.image = UIImage(contentsOfFile: FlickrClient.sharedInstance().photoURLs[indexPath.row])
+        //get image from retreived URLs
+        if FlickrClient.sharedInstance().photoURLs.count != 0 {
+            let photoURLstring = FlickrClient.sharedInstance().photoURLs[indexPath.row]
+            let photoURL = NSURL(string: photoURLstring)
+            let photoData = NSData(contentsOfURL: photoURL!)
+            cell.cellImageView.image = UIImage(data: photoData!)
+        }
         
         return cell
     }
