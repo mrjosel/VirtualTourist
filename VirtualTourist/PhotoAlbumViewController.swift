@@ -36,9 +36,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         //show navBar
         self.navigationController?.navigationBar.hidden = false
         
-        //setup collectionView and label
+        //setup collectionView
         self.photoCollectionView.backgroundColor = UIColor.whiteColor()
-        self.noPhotosLabel.hidden = true
         
         //set datasource
         self.photoCollectionView.dataSource = self
@@ -53,8 +52,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin.annotation.coordinate, 50000, 50000)
         self.mapView.setRegion(mapWindow, animated: true)
         
-        println("photoURLs = \(FlickrClient.sharedInstance().photoURLs)")
-        
+        //show or hide photoCollectionView and noPhotosLabel based on number of photos present
+        self.showHidePhotosLabel()
     }
     
     //gets size for collectionView
@@ -86,6 +85,19 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    //if no photos exist, hide photoCollectionView and show noPhotosLabel
+    func showHidePhotosLabel() {
+        self.noPhotosLabel.text = "No Photos"
+        //TODO: MAKE TEXT LOOK PRETTY
+        if FlickrClient.sharedInstance().photoURLs.count == 0 {
+            self.photoCollectionView.hidden = true
+            self.noPhotosLabel.hidden = false
+        } else {
+            self.photoCollectionView.hidden = false
+            self.noPhotosLabel.hidden = true
+        }
     }
 
     //grabs new collection of photos by incrementing page

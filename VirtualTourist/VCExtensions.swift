@@ -25,8 +25,9 @@ extension UIViewController {
             } else {
                 //retrieved photoURLs
                 println("got all the photos")
-                /*self.photoURLs*/ FlickrClient.sharedInstance().photoURLs = result![FlickrClient.OutputData.URLS] as! [String] //REPLACE WITH CORE DATA
-                /*self.maxPages*/ FlickrClient.sharedInstance().maxPages = result![FlickrClient.OutputData.PAGES] as? Int
+                println(result)
+                FlickrClient.sharedInstance().maxPages = result![FlickrClient.OutputData.PAGES] as? Int
+                FlickrClient.sharedInstance().photoURLs = FlickrClient.sharedInstance().maxPages == 0 ? [] : result![FlickrClient.OutputData.URLS] as! [String] //REPLACE WITH CORE DATA
                 completionHandler(success: true)
             }
         }
