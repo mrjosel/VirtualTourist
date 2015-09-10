@@ -142,15 +142,15 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     
     //perform the following when pin is selected
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
+
         //get photoURLs
-        
         println("selected annotation")
-        
         self.getPhotos(view, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage) { success in
             //perform segue if successful
             if success {
-                println("got photos, segueing to next VC")
+                println("segueing to next VC")
                 dispatch_async(dispatch_get_main_queue(), {
+                    println("execute performingSegueWithIdentifier")
                     self.performSegueWithIdentifier("photoAlbumVCSegue", sender: view)
                 })
             } else {
@@ -159,6 +159,8 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
                 //TODO: MAKE ALERT FUNCTION
             }
         }
+        //deselect pin
+        mapView.deselectAnnotation(view.annotation, animated: false)
     }
     
     //preparing segues
