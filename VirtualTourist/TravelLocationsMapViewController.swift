@@ -150,7 +150,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
             if success {
                 println("segueing to next VC")
                 dispatch_async(dispatch_get_main_queue(), {
-                    println("execute performingSegueWithIdentifier")
                     self.performSegueWithIdentifier("photoAlbumVCSegue", sender: view)
                 })
             } else {
@@ -165,7 +164,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     
     //preparing segues
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        println("preparing segue")
+//        println("preparing segue")
         //prepare segue, get VC and pass coordinate
         if segue.identifier == "photoAlbumVCSegue" {
             

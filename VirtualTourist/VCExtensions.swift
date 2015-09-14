@@ -22,16 +22,16 @@ extension UIViewController {
             if !success {
                 //TODO: Make Alert function
                 println("couldn't get photo urls")
-                completionHandler(success: false)
             } else {
                 //retrieved photoURLs
                 println("got all the photos")
                 FlickrClient.sharedInstance().maxPages = result![FlickrClient.OutputData.PAGES] as? Int
                 FlickrClient.sharedInstance().photoURLs = FlickrClient.sharedInstance().maxPages == 0 ? [] : result![FlickrClient.OutputData.URLS] as! [String] //REPLACE WITH CORE DATA
-                completionHandler(success: true)
             }
             println("dismissing getPhotosAlert")
-            gettingPhotosAlert.dismissViewControllerAnimated(true, completion: nil)
+            gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+                completionHandler(success: success)
+            })
         }
     }
     
