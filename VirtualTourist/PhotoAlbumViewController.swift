@@ -58,8 +58,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         return FlickrClient.sharedInstance().photoURLs.count
     }
     
-    func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
-        //TODO: IMPLEMENT COLLECTION VIEW
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        //TODO: IMPLEMENT FOR PERSISTENCE
     }
     
     //cell to be populated
@@ -101,6 +101,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     //TODO: RANDOMIZE PAGE AND NUMBER OF PHOTOS TO GRAB
     @IBAction func newCollectionButtonPressed(sender: UIBarButtonItem) {
         
+        //disable newCollectionButton
+        self.newCollectionButton.enabled = false
+        
         //increment page in case newCollectionButton is pressed, roll back to page 1 if maxPage is reached
         if FlickrClient.sharedInstance().page < FlickrClient.sharedInstance().maxPages {
             FlickrClient.sharedInstance().page++
@@ -125,8 +128,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                 self.makeAlert(self, title: "Error", error: error)
             }
         }
-        //end alertView
-        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: nil)
+        //end alertView,enable newCollectionButton upon completion
+        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+            self.newCollectionButton.enabled = true
+        })
     }
     
     
