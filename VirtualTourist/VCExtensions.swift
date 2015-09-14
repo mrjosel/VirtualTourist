@@ -14,37 +14,63 @@ import MapKit
 extension UIViewController {
 
     //get photos using pin cooridinate
-    func getPhotos(pin: MKAnnotationView, page: Int, perPage: Int, completionHandler: (success: Bool) -> Void) {
+    func getPhotos(pin: MKAnnotationView, page: Int, perPage: Int, completionHandler: (success: Bool, error: NSError?) -> Void) {
         println("GETTING PHOTOS")
         //pass pin into FlickrClient
-        var gettingPhotosAlert = self.showGettingPhotosAlert()
         FlickrClient.sharedInstance().getPhotoURLs(pin, page: page, perPage: perPage) { success, result, error in
+            var error: NSError?
             if !success {
-                //TODO: Make Alert function
+                //create error
                 println("couldn't get photo urls")
+                error = self.errorHandle("getPhotos", errorString: "Failed to Retrieve Photos")
             } else {
                 //retrieved photoURLs
                 println("got all the photos")
+                error = nil
                 FlickrClient.sharedInstance().maxPages = result![FlickrClient.OutputData.PAGES] as? Int
                 FlickrClient.sharedInstance().photoURLs = FlickrClient.sharedInstance().maxPages == 0 ? [] : result![FlickrClient.OutputData.URLS] as! [String] //REPLACE WITH CORE DATA
             }
-            println("dismissing getPhotosAlert")
-            gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
-                completionHandler(success: success)
-            })
+            //complete with handler
+            completionHandler(success: success, error: error)
         }
     }
     
-    //TODO: MAKE ALERT VIEW
+    //alert function
+    func makeAlert(hostVC: UIViewController, title: String, error: NSError?) -> Void {
+        //handler for OK button depending on VC
+        var handler: ((alert: UIAlertAction!) -> (Void))?
+        var messageText: String!
+        
+        if let error = error {
+            messageText = error.localizedDescription
+        } else {
+            messageText = "Press OK to Continue"
+        }
+        
+        //create UIAlertVC
+        var alertVC = UIAlertController(title: title, message: messageText, preferredStyle: UIAlertControllerStyle.Alert)
+        
+        //create action
+        let ok = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: handler)
+        
+        //add actions to alertVC
+        alertVC.addAction(ok)
+        dispatch_async(dispatch_get_main_queue(), {
+            //present alertVC
+            hostVC.presentViewController(alertVC, animated: true, completion: nil)
+        })
+    }
+    
+    //shorthand function to create custom error
+    func errorHandle(domain: String, errorString: String) -> NSError {
+        return NSError(domain: domain, code: 0, userInfo: [NSLocalizedDescriptionKey: "\(errorString)"])
+    }
     
     
     //indicator to show user that the app is retrieving photos
-    //MAYBE REMOVE IN ORDER TO IMPLEMENT COREDATA
-    
-//    dismiss2015-09-10 08:57:26.176 VirtualTourist[36990:2614621] pushViewController:animated: called on <UINavigationController 0x7f9598e1f4f0> while an existing transition or presentation is occurring; the navigation stack will not be updated.
-//    ing getPhotosAlert
-    
     func showGettingPhotosAlert() -> UIAlertController {
+        println("creating getting photos alertView")
+        
         //make alertView
         var alertView = UIAlertController(title: "Getting photos...", message: nil, preferredStyle: UIAlertControllerStyle.Alert)
         

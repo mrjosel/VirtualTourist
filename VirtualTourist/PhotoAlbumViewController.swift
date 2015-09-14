@@ -21,17 +21,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     //variables
     var selectedPin: MKAnnotationView!
     
-    override func viewWillAppear(animated: Bool) {
-        //reload data at every appearance
-        self.photoCollectionView.reloadData()
-        super.viewWillAppear(animated)
-    }
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        
+        //reload all data
+        self.photoCollectionView.reloadData()
+
         
         //show navBar
         self.navigationController?.navigationBar.hidden = false
@@ -111,8 +108,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
             FlickrClient.sharedInstance().page = 1
         }
         
+        //begin alertView while retrieving photos
+        var gettingPhotosAlert = self.showGettingPhotosAlert()
+        
         //get photos, overwrites existing collection
-        self.getPhotos(self.selectedPin, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage) { success in
+        self.getPhotos(self.selectedPin, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage) { success, error in
             
             //if success, update collection table
             if success {
@@ -120,11 +120,13 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                     self.photoCollectionView.reloadData()
                 })
             } else {
+                //alert user
                 println("failed to get new collection")
-                //TODO: MAKE ALERT FUNCTION
+                self.makeAlert(self, title: "Error", error: error)
             }
         }
-
+        //end alertView
+        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: nil)
     }
     
     
