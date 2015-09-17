@@ -50,7 +50,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        println("view loaded")
         // Do any additional setup after loading the view, typically from a nib.
         
         //set up pinDrop mechanism, make vc delegate
@@ -197,27 +196,24 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         println("didChangeObject")
         //create annotation from anObject
         let pin = anObject as! Pin
-        let droppedPin = MKPointAnnotation()
-        droppedPin.coordinate = pin.coordinate
-        
         
         //check which type
         switch type {
             //insert - add pin to map
         case NSFetchedResultsChangeType.Insert:
             println("didChangeObject - Insert")
-            self.mapView.addAnnotation(droppedPin)
+            self.mapView.addAnnotation(pin)
             
             //delete - remove pin from map
         case NSFetchedResultsChangeType.Delete:
             println("didChangeObject - Delete")
-            self.mapView.removeAnnotation(droppedPin)
+            self.mapView.removeAnnotation(pin)
             
             //update - remove pin from map, add it back in
         case NSFetchedResultsChangeType.Update:
             println("didChangeObject - Update")
-            self.mapView.removeAnnotation(droppedPin)
-            self.mapView.addAnnotation(droppedPin)
+            self.mapView.removeAnnotation(pin)
+            self.mapView.addAnnotation(pin)
             
             //default - break
         default:
