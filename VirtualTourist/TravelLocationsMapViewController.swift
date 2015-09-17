@@ -62,10 +62,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         
         //perform fetch
         self.fetchedResultsController.performFetch(nil)
-        
-        //get any persisted annotations if they exist
-        self.getAnnotations()
-        
     }
     
     //add pin to array and to map
@@ -89,33 +85,38 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
             CoreDataStackManager.sharedInstance().saveContext()
         }
     }
+//    TODO: DELETE METHOD
+//    //get persisted annotations
+//    func getAnnotations() {
+//
+//        //get array of objects from fetchResultsController
+//        let sectionInfo = self.fetchedResultsController.sections![0] as! NSFetchedResultsSectionInfo
+//        
+//        //don't do unless there are objects
+//        if sectionInfo.numberOfObjects != 0 {
+//        
+//            //for each persisted pin object
+//            for object in sectionInfo.objects {
+//                //get persisted latitude and longitude information
+//                let lat = (object as! Pin).latitude as! Double
+//                let lon = (object as! Pin).longitude as! Double
+//                
+//                //create coordinate from lat and lon
+//                let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+//                
+//                //create annotation, add coordinate, add to map
+//                var pin = MKPointAnnotation()
+//                pin.coordinate = coordinate
+//                self.mapView.addAnnotation(pin)
+//            }
+//        } else {
+//            println("no persisted pin objects")
+//        }
+//    }
     
-    //get persisted annotations
-    func getAnnotations() {
-
-        //get array of objects from fetchResultsController
-        let sectionInfo = self.fetchedResultsController.sections![0] as! NSFetchedResultsSectionInfo
-        
-        //don't do unless there are objects
-        if sectionInfo.numberOfObjects != 0 {
-        
-            //for each persisted pin object
-            for object in sectionInfo.objects {
-                //get persisted latitude and longitude information
-                let lat = (object as! Pin).latitude as! Double
-                let lon = (object as! Pin).longitude as! Double
-                
-                //create coordinate from lat and lon
-                let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-                
-                //create annotation, add coordinate, add to map
-                var pin = MKPointAnnotation()
-                pin.coordinate = coordinate
-                self.mapView.addAnnotation(pin)
-            }
-        } else {
-            println("no persisted pin objects")
-        }
+    //loads fetched Pin objects
+    func mapViewDidFinishLoadingMap(mapView: MKMapView!) {
+        mapView.addAnnotations(self.fetchedResultsController.fetchedObjects as! [Pin])
     }
     
     //create view for annotations
@@ -188,8 +189,13 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         super.prepareForSegue(segue, sender: sender)
     }
     
+    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+//        self.mapView.up
+        println("controllerWillChangeContent")
+    }
+    
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
-        
+        println("didChangeObject")
         //create annotation from anObject
         let pin = anObject as! Pin
         let droppedPin = MKPointAnnotation()
@@ -200,14 +206,17 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         switch type {
             //insert - add pin to map
         case NSFetchedResultsChangeType.Insert:
+            println("didChangeObject - Insert")
             self.mapView.addAnnotation(droppedPin)
             
             //delete - remove pin from map
         case NSFetchedResultsChangeType.Delete:
+            println("didChangeObject - Delete")
             self.mapView.removeAnnotation(droppedPin)
             
             //update - remove pin from map, add it back in
         case NSFetchedResultsChangeType.Update:
+            println("didChangeObject - Update")
             self.mapView.removeAnnotation(droppedPin)
             self.mapView.addAnnotation(droppedPin)
             
