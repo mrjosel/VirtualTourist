@@ -153,8 +153,9 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
             if success {
                 println("segueing to next VC")
                 dispatch_async(dispatch_get_main_queue(), {
-                    gettingPhotosAlert.dismissViewControllerAnimated(true, completion: nil)
-                    self.performSegueWithIdentifier("photoAlbumVCSegue", sender: view)
+                    gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+                        self.performSegueWithIdentifier("photoAlbumVCSegue", sender: view)
+                    })
                 })
             } else {
                 //alert user to error
