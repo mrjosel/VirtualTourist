@@ -50,6 +50,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        println("view loaded")
         // Do any additional setup after loading the view, typically from a nib.
         
         //set up pinDrop mechanism, make vc delegate
@@ -62,6 +63,9 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         
         //perform fetch
         self.fetchedResultsController.performFetch(nil)
+        
+        //add annotations from fetchedResultsController
+        self.mapView.addAnnotations(self.fetchedResultsController.fetchedObjects as! [Pin])
     }
     
     //add pin to array and to map
@@ -113,11 +117,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
 //            println("no persisted pin objects")
 //        }
 //    }
-    
-    //loads fetched Pin objects
-    func mapViewDidFinishLoadingMap(mapView: MKMapView!) {
-        mapView.addAnnotations(self.fetchedResultsController.fetchedObjects as! [Pin])
-    }
     
     //create view for annotations
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
