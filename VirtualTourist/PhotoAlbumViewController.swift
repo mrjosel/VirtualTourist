@@ -19,7 +19,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     @IBOutlet weak var noPhotosLabel: UILabel!
     
     //variables
-    var selectedPin: MKAnnotationView!
+    var selectedPin: Pin!//MKAnnotationView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,15 +42,17 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
         //setup mapview
         self.mapView.delegate = self
-        self.mapView.addAnnotation(selectedPin.annotation)
+        self.mapView.addAnnotation(selectedPin)//.annotation)
         self.mapView.zoomEnabled = false
         self.mapView.scrollEnabled = false
         self.mapView.userInteractionEnabled = false
-        let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin.annotation.coordinate, 50000, 50000)
+        let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin/*.annotation*/.coordinate, 50000, 50000)
         self.mapView.setRegion(mapWindow, animated: true)
         
         //show or hide photoCollectionView and noPhotosLabel based on number of photos present
         self.showHidePhotosLabel()
+        
+        println(selectedPin)
     }
     
     //gets size for collectionView

@@ -10,8 +10,6 @@ import UIKit
 import MapKit
 import CoreData
 
-
-
 class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate {
     
     //Map View
@@ -19,6 +17,8 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     
     //gesture for dropping pin
     var pinDropGesture : UILongPressGestureRecognizer?
+    
+    var localPin: Pin?
     
     //shared context
     lazy var sharedContext: NSManagedObjectContext = {
@@ -62,7 +62,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         
         //perform fetch
         self.fetchedResultsController.performFetch(nil)
-        
+
         //add annotations from fetchedResultsController
         self.mapView.addAnnotations(self.fetchedResultsController.fetchedObjects as! [Pin])
     }
@@ -76,46 +76,38 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         
         //only allow pins to be dropped once, not checking state place pins indefinitely
         if sender.state == .Began {
-            
-            //create annotation
-            var dropPin = MKPointAnnotation()
-            dropPin.coordinate = coordinates
-            
+
             //create Pin object
-            let pinToBeAdded = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
+            let pin = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
+            self.localPin = pin
+            println(pin)
             
             //save context
             CoreDataStackManager.sharedInstance().saveContext()
         }
     }
-//    TODO: DELETE METHOD
-//    //get persisted annotations
-//    func getAnnotations() {
-//
-//        //get array of objects from fetchResultsController
-//        let sectionInfo = self.fetchedResultsController.sections![0] as! NSFetchedResultsSectionInfo
-//        
-//        //don't do unless there are objects
-//        if sectionInfo.numberOfObjects != 0 {
-//        
-//            //for each persisted pin object
-//            for object in sectionInfo.objects {
-//                //get persisted latitude and longitude information
-//                let lat = (object as! Pin).latitude as! Double
-//                let lon = (object as! Pin).longitude as! Double
-//                
-//                //create coordinate from lat and lon
-//                let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-//                
-//                //create annotation, add coordinate, add to map
-//                var pin = MKPointAnnotation()
-//                pin.coordinate = coordinate
-//                self.mapView.addAnnotation(pin)
-//            }
-//        } else {
-//            println("no persisted pin objects")
-//        }
-//    }
+    
+    //method to locate Pin associated with MKAnnotationView
+    func findPersistedPin(coord: CLLocationCoordinate2D) -> Pin? {
+        //get lat and lon from coord
+        let testLat = coord.latitude
+        let testLon = coord.longitude
+        
+        //cycle through all fetchedResults
+        for object in self.fetchedResultsController.fetchedObjects! {
+            //get lat and lon from Pin object
+            let pin = object as! Pin
+            var lat = pin.latitude
+            var lon = pin.longitude
+            
+            //coords match, pin object is found
+            if testLat == lat && testLon == lon {
+                return pin
+            }
+        }
+        //return nil if no Pin is found
+        return nil
+    }
     
     //create view for annotations
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
@@ -143,18 +135,21 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
         println("selected annotation")
         
+        var pin = self.findPersistedPin(view.annotation.coordinate)
+                
         //begin alertView while retrieving photos
         var gettingPhotosAlert = self.showGettingPhotosAlert()
         
         //get photoURLs
-        self.getPhotos(view, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage) { success, error in
+        self.getPhotos(/*view*/pin!, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage) { success, error in
             
             //perform segue if successful
             if success {
                 println("segueing to next VC")
                 dispatch_async(dispatch_get_main_queue(), {
-                    gettingPhotosAlert.dismissViewControllerAnimated(true, completion: nil)
-                    self.performSegueWithIdentifier("photoAlbumVCSegue", sender: view)
+                    gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+                        self.performSegueWithIdentifier("photoAlbumVCSegue", sender: pin)//view)
+                    })
                 })
             } else {
                 //alert user to error
@@ -177,7 +172,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         if segue.identifier == "photoAlbumVCSegue" {
             
             //cast sender as MKAnnotationView, get coordinate from sender
-            let selectedPin = sender as! MKAnnotationView
+            let selectedPin = sender as! Pin//MKAnnotationView
             
             let photoAlbumVC = segue.destinationViewController as! PhotoAlbumViewController
             photoAlbumVC.selectedPin = selectedPin
@@ -185,11 +180,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         
         //super
         super.prepareForSegue(segue, sender: sender)
-    }
-    
-    func controllerWillChangeContent(controller: NSFetchedResultsController) {
-//        self.mapView.up
-        println("controllerWillChangeContent")
     }
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {

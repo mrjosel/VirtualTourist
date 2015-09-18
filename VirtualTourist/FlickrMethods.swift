@@ -44,11 +44,11 @@ extension FlickrClient {
     }
     
     //get all photos using MKAnnotationView
-    func getPhotoURLs(pin: MKAnnotationView, page: Int, perPage: Int, completionHandler: (success: Bool, result: [String: AnyObject]?, error: NSError?) -> Void) {
+    func getPhotoURLs(pin: /*MKAnnotationView*/Pin, page: Int, perPage: Int, completionHandler: (success: Bool, result: [String: AnyObject]?, error: NSError?) -> Void) {
         
         //get lat and lon values
-        let lat = pin.annotation.coordinate.latitude
-        let lon = pin.annotation.coordinate.longitude
+        let lat = pin/*.annotation*/.coordinate.latitude
+        let lon = pin/*.annotation*/.coordinate.longitude
         
         //create params for Flickr GET method
         let params : [String: AnyObject] = [

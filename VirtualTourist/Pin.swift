@@ -19,6 +19,7 @@ class Pin: NSManagedObject, MKAnnotation {
     @NSManaged var latitude: NSNumber!
     @NSManaged var longitude: NSNumber!
     @NSManaged var flickrPhotos: [FlickrPhoto]?
+    @NSManaged var pages: NSNumber?
     
     //called in init
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
