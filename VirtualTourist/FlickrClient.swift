@@ -12,9 +12,9 @@ import Foundation
 class FlickrClient {
     
     //page and perPage variables
-    var page = 1
+//    var page = 1
     var perPage = 20
-    var maxPages: Int?
+//    var maxPages: Int?
     
     //photoURLs TO BE REMOVED AFTER CORE DATA IMPLEMENTATION
     var photoURLs = [String]()

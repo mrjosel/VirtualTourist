@@ -17,9 +17,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     
     //gesture for dropping pin
     var pinDropGesture : UILongPressGestureRecognizer?
-    
-    var localPin: Pin?
-    
+        
     //shared context
     lazy var sharedContext: NSManagedObjectContext = {
         
@@ -79,7 +77,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
 
             //create Pin object
             let pin = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
-            self.localPin = pin
             println(pin)
             
             //save context
@@ -161,10 +158,10 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
 //                })
 //            }
 //        }
-        
-        self.performSegueWithIdentifier("photoAlbumVCSegue", sender: pin)
         //deselect pin
         mapView.deselectAnnotation(view.annotation, animated: false)
+        //segue to photoAlbumVC
+        self.performSegueWithIdentifier("photoAlbumVCSegue", sender: pin)
     }
     
     //preparing segues
@@ -174,7 +171,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         if segue.identifier == "photoAlbumVCSegue" {
             
             //cast sender as MKAnnotationView, get coordinate from sender
-            let selectedPin = sender as! Pin//MKAnnotationView
+            let selectedPin = sender as! Pin
             
             let photoAlbumVC = segue.destinationViewController as! PhotoAlbumViewController
             photoAlbumVC.selectedPin = selectedPin
