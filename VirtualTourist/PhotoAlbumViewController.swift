@@ -86,22 +86,22 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             self.getPhotos(selectedPin, page: selectedPin.page as? Int, perPage: FlickrClient.sharedInstance().perPage) { success, error in
                 
                 //create gettingPhotosAlert
-//                var gettingPhotosAlert = self.showGettingPhotosAlert()
+                var gettingPhotosAlert = self.showGettingPhotosAlert()
                 
                 //perform segue if successful
                 if success {
                     println("segueing to next VC")
-                    dispatch_async(dispatch_get_main_queue(), {
-//                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+//                    dispatch_async(dispatch_get_main_queue(), {
+                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
                             //reload photos
                             println("selectedPin.flickrPhotos = \(self.selectedPin.flickrPhotos.count)")
-//                        })
-                    })
+                        })
+//                    })
                 } else {
                     //alert user to error
                     println("failed to get all photos")
-                    dispatch_async(dispatch_get_main_queue(), {
-//                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+//                    dispatch_async(dispatch_get_main_queue(), {
+                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
                             self.makeAlert(self, title: "Error", error: error)
                         })
 //                    })
@@ -228,7 +228,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                 println("pin.pages = \(pin.pages)")
                 var urlStrings = pin.pages == 0 ? [] : result![FlickrClient.OutputData.URLS] as! [String]
                 self.makeFlickrPhotos(urlStrings)
-                CoreDataStackManager.sharedInstance().saveContext()
             }
             //complete with handler
             completionHandler(success: success, error: error)

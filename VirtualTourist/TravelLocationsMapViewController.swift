@@ -81,6 +81,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
             
             //save context
             CoreDataStackManager.sharedInstance().saveContext()
+            println("pin dropped")
         }
     }
     
@@ -109,7 +110,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     //create view for annotations
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
         //TODO: FIX RADIUS BUG
-        
+        println("viewForAnnotation")
         //reuseID and pinView
         let reuseID = "pin"
         var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseID) as? MKPinAnnotationView
