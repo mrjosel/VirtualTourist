@@ -17,6 +17,7 @@ class FlickrPhoto: NSManagedObject {
     
     //managed variables
     @NSManaged var urlString: String!
+    @NSManaged var pin: Pin?
 
     //called in init
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
@@ -27,7 +28,7 @@ class FlickrPhoto: NSManagedObject {
     init(urlString: String, context: NSManagedObjectContext) {
         
         //create entity
-        let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)
+        let entity = NSEntityDescription.entityForName("FlickrPhoto", inManagedObjectContext: context)
         
         //call super method
         super.init(entity: entity!, insertIntoManagedObjectContext: context)

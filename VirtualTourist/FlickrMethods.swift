@@ -44,17 +44,17 @@ extension FlickrClient {
     }
     
     //get all photos using MKAnnotationView
-    func getPhotoURLs(pin: MKAnnotationView, page: Int, perPage: Int, completionHandler: (success: Bool, result: [String: AnyObject]?, error: NSError?) -> Void) {
+    func getPhotoURLs(pin: Pin, page: Int?, perPage: Int, completionHandler: (success: Bool, result: [String: AnyObject]?, error: NSError?) -> Void) {
         
         //get lat and lon values
-        let lat = pin.annotation.coordinate.latitude
-        let lon = pin.annotation.coordinate.longitude
+        let lat = pin.coordinate.latitude
+        let lon = pin.coordinate.longitude
         
         //create params for Flickr GET method
         let params : [String: AnyObject] = [
             FlickrClient.Params.LAT : lat,
             FlickrClient.Params.LON : lon,
-            FlickrClient.Params.PAGE : page,
+            FlickrClient.Params.PAGE : page != nil ? page! : 1,
             FlickrClient.Params.PER_PAGE : perPage
         ]
         
@@ -75,6 +75,7 @@ extension FlickrClient {
                     println("successfully casted JSON to [[String: AnyObject]]")
                     if let photosDict = parsedJSON[FlickrClient.Response.PHOTOS] as? [String: AnyObject] {
                         println("successfully retrieved photosDict as [String: AnyObject]")
+                        println(photosDict)
                         if let photosArray = photosDict[FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
                             //add array of urlStrings to dict
                             var photoURLstrings = self.makePhotoURLs(photosArray)

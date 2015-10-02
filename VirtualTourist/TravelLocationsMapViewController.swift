@@ -10,117 +10,107 @@ import UIKit
 import MapKit
 import CoreData
 
-
-
 class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate {
-    
+
     //Map View
     @IBOutlet weak var mapView: MKMapView!
-    
+
     //gesture for dropping pin
     var pinDropGesture : UILongPressGestureRecognizer?
-    
+
     //shared context
     lazy var sharedContext: NSManagedObjectContext = {
-        
+
         //return context from CoreData
         return CoreDataStackManager.sharedInstance().managedObjectContext!
         }()
-    
+
     //fetched results controller for persisting pins
     lazy var fetchedResultsController: NSFetchedResultsController = {
-        
+
         //create fetch request with sort descriptor
         let fetchRequest = NSFetchRequest(entityName: "Pin")
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true), NSSortDescriptor(key: "longitude", ascending: true)]
-        
+
         //create controller from fetch request
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
-        
+
         return fetchedResultsController
         }()
-    
+
     override func viewWillAppear(animated: Bool) {
         //always hide navBar
         self.navigationController?.navigationBar.hidden = true
-        
+
         //super
         super.viewWillAppear(animated)
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        
+
         //set up pinDrop mechanism, make vc delegate
         self.pinDropGesture = UILongPressGestureRecognizer(target: self, action: "dropPin:")
         self.mapView.addGestureRecognizer(self.pinDropGesture!)
-        
+
         //set delegates
         self.mapView.delegate = self
         self.fetchedResultsController.delegate = self
-        
+
         //perform fetch
         self.fetchedResultsController.performFetch(nil)
-        
+
         //add annotations from fetchedResultsController
         self.mapView.addAnnotations(self.fetchedResultsController.fetchedObjects as! [Pin])
     }
-    
+
     //add pin to array and to map
     func dropPin(sender: UIGestureRecognizer) {
 
         //create coordinate object point object
         let point = sender.locationInView(self.mapView)
         let coordinates = self.mapView.convertPoint(point, toCoordinateFromView: self.mapView)
-        
+
         //only allow pins to be dropped once, not checking state place pins indefinitely
         if sender.state == .Began {
-            
-            //create annotation
-            var dropPin = MKPointAnnotation()
-            dropPin.coordinate = coordinates
-            
+
             //create Pin object
-            let pinToBeAdded = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
-            
+            let pin = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
+            println(pin)
+
             //save context
             CoreDataStackManager.sharedInstance().saveContext()
+            println("pin dropped")
         }
     }
-//    TODO: DELETE METHOD
-//    //get persisted annotations
-//    func getAnnotations() {
-//
-//        //get array of objects from fetchResultsController
-//        let sectionInfo = self.fetchedResultsController.sections![0] as! NSFetchedResultsSectionInfo
-//        
-//        //don't do unless there are objects
-//        if sectionInfo.numberOfObjects != 0 {
-//        
-//            //for each persisted pin object
-//            for object in sectionInfo.objects {
-//                //get persisted latitude and longitude information
-//                let lat = (object as! Pin).latitude as! Double
-//                let lon = (object as! Pin).longitude as! Double
-//                
-//                //create coordinate from lat and lon
-//                let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-//                
-//                //create annotation, add coordinate, add to map
-//                var pin = MKPointAnnotation()
-//                pin.coordinate = coordinate
-//                self.mapView.addAnnotation(pin)
-//            }
-//        } else {
-//            println("no persisted pin objects")
-//        }
-//    }
-    
+
+    //method to locate Pin associated with MKAnnotationView
+    func findPersistedPin(coord: CLLocationCoordinate2D) -> Pin? {
+        //get lat and lon from coord
+        let testLat = coord.latitude
+        let testLon = coord.longitude
+
+        //cycle through all fetchedResults
+        for object in self.fetchedResultsController.fetchedObjects! {
+            //get lat and lon from Pin object
+            let pin = object as! Pin
+            var lat = pin.latitude
+            var lon = pin.longitude
+
+            //coords match, pin object is found
+            if testLat == lat && testLon == lon {
+                return pin
+            }
+        }
+        //return nil if no Pin is found
+        return nil
+    }
+
     //create view for annotations
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
         //TODO: FIX RADIUS BUG
-        
+        println("viewForAnnotation")
         //reuseID and pinView
         let reuseID = "pin"
         var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseID) as? MKPinAnnotationView
@@ -135,92 +125,67 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
             //otherwise, add annotation
             pinView!.annotation = annotation
         }
-        
+
         return pinView
     }
-    
+
     //perform the following when pin is selected
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
         println("selected annotation")
-        
-        //begin alertView while retrieving photos
-        var gettingPhotosAlert = self.showGettingPhotosAlert()
-        
-        //get photoURLs
-        self.getPhotos(view, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage) { success, error in
-            
-            //perform segue if successful
-            if success {
-                println("segueing to next VC")
-                dispatch_async(dispatch_get_main_queue(), {
-                    gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
-                        self.performSegueWithIdentifier("photoAlbumVCSegue", sender: view)
-                    })
-                })
-            } else {
-                //alert user to error
-                println("failed to get all photos")
-                dispatch_async(dispatch_get_main_queue(), {
-                    gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
-                        self.makeAlert(self, title: "Error", error: error)
-                    })
-                })
-            }
-        }
+        //find Pin object matching selected annotationView
+        var pin = self.findPersistedPin(view.annotation.coordinate)
+        println(pin)
+
         //deselect pin
         mapView.deselectAnnotation(view.annotation, animated: false)
+        //segue to photoAlbumVC
+        self.performSegueWithIdentifier("photoAlbumVCSegue", sender: pin)
     }
-    
+
     //preparing segues
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         println("preparing segue")
         //prepare segue, get VC and pass coordinate
         if segue.identifier == "photoAlbumVCSegue" {
-            
+
             //cast sender as MKAnnotationView, get coordinate from sender
-            let selectedPin = sender as! MKAnnotationView
-            
+            let selectedPin = sender as! Pin
+
             let photoAlbumVC = segue.destinationViewController as! PhotoAlbumViewController
             photoAlbumVC.selectedPin = selectedPin
         }
-        
+
         //super
         super.prepareForSegue(segue, sender: sender)
     }
-    
-    func controllerWillChangeContent(controller: NSFetchedResultsController) {
-//        self.mapView.up
-        println("controllerWillChangeContent")
-    }
-    
+
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
-        println("didChangeObject")
         //create annotation from anObject
         let pin = anObject as! Pin
-        
+
         //check which type
         switch type {
             //insert - add pin to map
         case NSFetchedResultsChangeType.Insert:
             println("didChangeObject - Insert")
             self.mapView.addAnnotation(pin)
-            
+
             //delete - remove pin from map
         case NSFetchedResultsChangeType.Delete:
             println("didChangeObject - Delete")
             self.mapView.removeAnnotation(pin)
-            
+
             //update - remove pin from map, add it back in
         case NSFetchedResultsChangeType.Update:
             println("didChangeObject - Update")
             self.mapView.removeAnnotation(pin)
             self.mapView.addAnnotation(pin)
-            
+
             //default - break
         default:
             break
         }
-        
+
     }
 
     override func didReceiveMemoryWarning() {
@@ -229,4 +194,3 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     }
 
 }
-

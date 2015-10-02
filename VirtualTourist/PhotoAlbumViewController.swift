@@ -8,8 +8,9 @@
 
 import UIKit
 import MapKit
+import CoreData
 
-class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate ,UICollectionViewDelegate, UICollectionViewDataSource {
 
     //Outlets
     @IBOutlet weak var mapView: MKMapView!
@@ -19,7 +20,28 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     @IBOutlet weak var noPhotosLabel: UILabel!
     
     //variables
-    var selectedPin: MKAnnotationView!
+    var selectedPin: Pin!//MKAnnotationView!
+    
+    //shared context
+    lazy var sharedContext: NSManagedObjectContext = {
+        
+        //return context from CoreData
+        return CoreDataStackManager.sharedInstance().managedObjectContext!
+        }()
+    
+    //fetched results controller for persisting pins
+    lazy var fetchedResultsController: NSFetchedResultsController = {
+        
+        //create fetch request with sort descriptor
+        let fetchRequest = NSFetchRequest(entityName: "FlickrPhoto")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "urlString", ascending: true)]
+        fetchRequest.predicate = NSPredicate(format: "pin == %@", self.selectedPin);
+        
+        //create controller from fetch request
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        return fetchedResultsController
+        }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,20 +64,57 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
         //setup mapview
         self.mapView.delegate = self
-        self.mapView.addAnnotation(selectedPin.annotation)
+        self.mapView.addAnnotation(selectedPin)//.annotation)
         self.mapView.zoomEnabled = false
         self.mapView.scrollEnabled = false
         self.mapView.userInteractionEnabled = false
-        let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin.annotation.coordinate, 50000, 50000)
+        let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin.coordinate, 50000, 50000)
         self.mapView.setRegion(mapWindow, animated: true)
         
         //show or hide photoCollectionView and noPhotosLabel based on number of photos present
         self.showHidePhotosLabel()
+        
+        //perform fetch
+        self.fetchedResultsController.delegate = self
+        self.fetchedResultsController.performFetch(nil)
+        
+        println(selectedPin)
+        
+        //get photos if no photos persisted with Pin
+        if self.selectedPin.flickrPhotos.isEmpty {
+            println("no photos persisted, getting photos")
+            self.getPhotos(selectedPin, page: selectedPin.page as? Int, perPage: FlickrClient.sharedInstance().perPage) { success, error in
+                
+                //create gettingPhotosAlert
+                //TODO: NEED BETTER ACTIVITY INDICATOR
+                var gettingPhotosAlert = self.makeGettingPhotosAlert()
+                //display alert
+                println("showing getPhotosAlert")
+//                self.presentViewController(gettingPhotosAlert, animated: true, completion: nil)
+                
+                //perform segue if successful
+                if success {
+                    println("finished retrieving photos")
+//                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+                            //reload photos
+                            println("selectedPin.flickrPhotos = \(self.selectedPin.flickrPhotos.count)")
+//                        })
+                } else {
+                    //alert user to error
+                    println("failed to get all photos")
+//                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+                            self.makeAlert(self, title: "Error", error: error)
+//                        })
+                }
+            }
+        } else {
+            println("persisted photos present, count = \(self.fetchedResultsController.fetchedObjects!.count)")
+        }
     }
     
     //gets size for collectionView
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return FlickrClient.sharedInstance().photoURLs.count
+        return self.selectedPin.flickrPhotos.count //FlickrClient.sharedInstance().photoURLs.count
     }
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
@@ -105,17 +164,17 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         self.newCollectionButton.enabled = false
         
         //increment page in case newCollectionButton is pressed, roll back to page 1 if maxPage is reached
-        if FlickrClient.sharedInstance().page < FlickrClient.sharedInstance().maxPages {
-            FlickrClient.sharedInstance().page++
+        if (self.selectedPin.page as! Int) < (self.selectedPin.pages as! Int) {
+            self.selectedPin.page = NSNumber(int: (self.selectedPin.page as! Int) + 1)
         } else {
-            FlickrClient.sharedInstance().page = 1
+            self.selectedPin.page = NSNumber(int: 1)
         }
         
         //begin alertView while retrieving photos
-        var gettingPhotosAlert = self.showGettingPhotosAlert()
+        var gettingPhotosAlert = self.makeGettingPhotosAlert()
         
         //get photos, overwrites existing collection
-        self.getPhotos(self.selectedPin, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage) { success, error in
+        self.getPhotos(self.selectedPin, page: self.selectedPin.page as? Int, perPage: FlickrClient.sharedInstance().perPage) { success, error in
             
             //if success, update collection table
             if success {
@@ -134,7 +193,47 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         })
     }
     
+    //create flickrPhoto objects from urlStrings
+    func makeFlickrPhotos(urlStrings: [String]) /*-> [FlickrPhoto]*/ {
+        println("making flickrPhoto objects")
+
+        //map returned urlStrings into flickrPhoto objects
+        var flickrPhotos = urlStrings.map() { (urlString: String) -> FlickrPhoto in
+            
+            //create flickrPhoto and set pin param as selectedPin
+            let flickrPhoto = FlickrPhoto(urlString: urlString, context: self.sharedContext)
+            flickrPhoto.pin = self.selectedPin
+            
+            return flickrPhoto
+        }
+        
+        println("returning flickrPhotos")
+    }
     
+    //get photos using pin cooridinate
+    func getPhotos(pin: Pin, page: Int?, perPage: Int, completionHandler: (success: Bool, error: NSError?) -> Void) {
+        println("GETTING PHOTOS")
+        //pass pin into FlickrClient
+        FlickrClient.sharedInstance().getPhotoURLs(pin, page: page, perPage: perPage) { success, result, error in
+            var error: NSError?
+            if !success {
+                //create error
+                println("couldn't get photo urls")
+                error = self.errorHandle("getPhotos", errorString: "Failed to Retrieve Photos")
+            } else {
+                //retrieved photoURLs
+                println("got all the photos")
+                error = nil
+                pin.pages = result![FlickrClient.OutputData.PAGES] as! Int
+                println("pin.pages = \(pin.pages)")
+                var urlStrings = pin.pages == 0 ? [] : result![FlickrClient.OutputData.URLS] as! [String]
+                self.makeFlickrPhotos(urlStrings)
+            }
+            //complete with handler
+            completionHandler(success: success, error: error)
+        }
+    }
+        
     /*
     // MARK: - Navigation
 
