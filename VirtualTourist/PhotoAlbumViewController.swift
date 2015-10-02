@@ -86,29 +86,29 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             self.getPhotos(selectedPin, page: selectedPin.page as? Int, perPage: FlickrClient.sharedInstance().perPage) { success, error in
                 
                 //create gettingPhotosAlert
-                var gettingPhotosAlert = self.showGettingPhotosAlert()
+                //TODO: NEED BETTER ACTIVITY INDICATOR
+                var gettingPhotosAlert = self.makeGettingPhotosAlert()
+                //display alert
+                println("showing getPhotosAlert")
+//                self.presentViewController(gettingPhotosAlert, animated: true, completion: nil)
                 
                 //perform segue if successful
                 if success {
-                    println("segueing to next VC")
-//                    dispatch_async(dispatch_get_main_queue(), {
-                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+                    println("finished retrieving photos")
+//                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
                             //reload photos
                             println("selectedPin.flickrPhotos = \(self.selectedPin.flickrPhotos.count)")
-                        })
-//                    })
+//                        })
                 } else {
                     //alert user to error
                     println("failed to get all photos")
-//                    dispatch_async(dispatch_get_main_queue(), {
-                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+//                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
                             self.makeAlert(self, title: "Error", error: error)
-                        })
-//                    })
+//                        })
                 }
             }
         } else {
-            println("persisted photos present")
+            println("persisted photos present, count = \(self.fetchedResultsController.fetchedObjects!.count)")
         }
     }
     
@@ -171,7 +171,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         
         //begin alertView while retrieving photos
-        var gettingPhotosAlert = self.showGettingPhotosAlert()
+        var gettingPhotosAlert = self.makeGettingPhotosAlert()
         
         //get photos, overwrites existing collection
         self.getPhotos(self.selectedPin, page: self.selectedPin.page as? Int, perPage: FlickrClient.sharedInstance().perPage) { success, error in

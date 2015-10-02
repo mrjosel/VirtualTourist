@@ -80,7 +80,7 @@ extension UIViewController {
     
     
     //indicator to show user that the app is retrieving photos
-    func showGettingPhotosAlert() -> UIAlertController {
+    func makeGettingPhotosAlert() -> UIAlertController {
         println("creating getting photos alertView")
         
         //make alertView
@@ -103,9 +103,9 @@ extension UIViewController {
 //        constraints += NSLayoutConstraint.constraintsWithVisualFormat("H:|[indicator]|", options: nil, metrics: nil, views: views)
 //        alertView.view.addConstraints(constraints)
         
-        //display alert
-        println("showing getPhotosAlert")
-        self.presentViewController(alertView, animated: true, completion: nil)
+//        //display alert
+//        println("showing getPhotosAlert")
+//        self.presentViewController(alertView, animated: true, completion: nil)
         
         //return alertView to allow for dismissal upon completion of activity
         return alertView

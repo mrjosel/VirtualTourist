@@ -133,32 +133,10 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
         println("selected annotation")
         
+        //find Pin object matching selected annotationView
         var pin = self.findPersistedPin(view.annotation.coordinate)
         println(pin)
-        //begin alertView while retrieving photos
-//        var gettingPhotosAlert = self.showGettingPhotosAlert()
-        
-        //get photoURLs
-//        self.getPhotos(/*view*/pin!, page: FlickrClient.sharedInstance().page, perPage: FlickrClient.sharedInstance().perPage) { success, error in
-//            
-//            //perform segue if successful
-//            if success {
-//                println("segueing to next VC")
-//                dispatch_async(dispatch_get_main_queue(), {
-//                    gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
-//                        self.performSegueWithIdentifier("photoAlbumVCSegue", sender: pin)//view)
-//                    })
-//                })
-//            } else {
-//                //alert user to error
-//                println("failed to get all photos")
-//                dispatch_async(dispatch_get_main_queue(), {
-//                    gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
-//                        self.makeAlert(self, title: "Error", error: error)
-//                    })
-//                })
-//            }
-//        }
+
         //deselect pin
         mapView.deselectAnnotation(view.annotation, animated: false)
         //segue to photoAlbumVC

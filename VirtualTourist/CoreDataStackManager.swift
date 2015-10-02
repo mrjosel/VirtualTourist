@@ -81,7 +81,7 @@ class CoreDataStackManager {
         }()
     
     func saveContext() {
-        
+        println("saving context")
         //get managed object context
         if let context = self.managedObjectContext {
             
