@@ -87,9 +87,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         println(selectedPin)
         
-        //show or hide photoCollectionView and noPhotosLabel based on number of photos present
-        self.showHidePhotosLabel()
-        
         //get photos if no photos persisted with Pin
         if self.selectedPin.flickrPhotos.isEmpty {
             println("no photos persisted, getting photos")
@@ -109,6 +106,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                             //reload photos
                             println("selectedPin.flickrPhotos = \(self.selectedPin.flickrPhotos.count)")
 //                        })
+                    CoreDataStackManager.sharedInstance().saveContext()
                 } else {
                     //alert user to error
                     println("failed to get all photos")
@@ -120,6 +118,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         } else {
             println("persisted photos present, count = \(self.fetchedResultsController.fetchedObjects!.count)")
         }
+        
+        //show or hide photoCollectionView and noPhotosLabel based on number of photos present
+        self.showHidePhotosLabel()
     }
     
     //get sections for collectionView
@@ -264,10 +265,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         //TODO: WHY IS IT ALWAYS ON???????
         self.noPhotosLabel.text = "No Photos"
         //TODO: MAKE TEXT LOOK PRETTY
-        if /*FlickrClient.sharedInstance().photoURLs.count == 0*/ self.fetchedResultsController.fetchedObjects!.count == 0 {
+        if /*FlickrClient.sharedInstance().photoURLs.count == 0*/ self.selectedPin.flickrPhotos.count == 0 {
+            println("displaying no photos label")
             self.photoCollectionView.hidden = true
             self.noPhotosLabel.hidden = false
         } else {
+            println("hiding no photos label")
             self.photoCollectionView.hidden = false
             self.noPhotosLabel.hidden = true
         }

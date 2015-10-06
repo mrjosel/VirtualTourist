@@ -75,7 +75,6 @@ extension FlickrClient {
                     println("successfully casted JSON to [[String: AnyObject]]")
                     if let photosDict = parsedJSON[FlickrClient.Response.PHOTOS] as? [String: AnyObject] {
                         println("successfully retrieved photosDict as [String: AnyObject]")
-                        println(photosDict)
                         if let photosArray = photosDict[FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
                             //add array of urlStrings to dict
                             var photoURLstrings = self.makePhotoURLs(photosArray)
