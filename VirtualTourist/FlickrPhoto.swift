@@ -36,4 +36,12 @@ class FlickrPhoto: NSManagedObject {
         //set parameters
         self.urlString = urlString
     }
+    
+    var flickrImage : UIImage? {
+        
+        get {
+            println("flickrImage requested")
+            return FlickrClient.sharedInstance().imageFromURLstring(self.urlString)
+        }
+    }
 }

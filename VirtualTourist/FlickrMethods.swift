@@ -141,4 +141,22 @@ extension FlickrClient {
         
         return outputDict
     }
+    
+    //getting image using urlString
+    func imageFromURLstring(urlString: String) -> UIImage? {
+        println("getting flickrImage fromURLString")
+        //make url from urlString
+        var url = NSURL(string: urlString)
+        
+        //get data at url
+        if let imgData = NSData(contentsOfURL: url!) {
+            //return image from data
+            println("return flickrImage from data")
+            return UIImage(data: imgData)!
+        } else {
+            //no data at URL, return nil
+            println("no image from data, returning empty image pic")
+            return nil
+        }
+    }
 }

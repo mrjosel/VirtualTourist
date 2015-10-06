@@ -13,4 +13,7 @@ class PhotoCollectionViewCell: UICollectionViewCell {
     
     //image to be populated in cells
     @IBOutlet weak var cellImageView: UIImageView!
+    
+    //flickrPhoto, may not be required
+    var flickrPhoto: FlickrPhoto?
 }

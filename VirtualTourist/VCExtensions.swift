@@ -47,6 +47,16 @@ extension UIViewController {
 //        }
 //    }
     
+    //empty Image
+    func makeEmptyImage(cell: PhotoCollectionViewCell) -> UIImage {
+        //get cgsize from cell imgView, make blank image, return
+        let size: CGSize = cell.cellImageView.frame.size
+        UIGraphicsBeginImageContext(size)
+        var emptyImg: UIImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return emptyImg
+    }
+    
     //alert function
     func makeAlert(hostVC: UIViewController, title: String, error: NSError?) -> Void {
         //handler for OK button depending on VC

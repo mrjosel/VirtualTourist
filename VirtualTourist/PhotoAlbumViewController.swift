@@ -19,8 +19,18 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     @IBOutlet weak var newCollectionButton: UIBarButtonItem!
     @IBOutlet weak var noPhotosLabel: UILabel!
     
-    //variables
-    var selectedPin: Pin!//MKAnnotationView!
+    //Selected Pin variable
+    var selectedPin: Pin!
+    
+    // The selected indexes array keeps all of the indexPaths for cells that are "selected". The array is
+    // used inside cellForItemAtIndexPath to lower the alpha of selected cells.  You can see how the array
+    // works by searchign through the code for 'selectedIndexes'
+    var selectedIndices = [NSIndexPath]()
+    
+    // Keep the changes. We will keep track of insertions, deletions, and updates.
+    var insertedIndexPaths: [NSIndexPath]!
+    var deletedIndexPaths: [NSIndexPath]!
+    var updatedIndexPaths: [NSIndexPath]!
     
     //shared context
     lazy var sharedContext: NSManagedObjectContext = {
@@ -71,14 +81,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin.coordinate, 50000, 50000)
         self.mapView.setRegion(mapWindow, animated: true)
         
-        //show or hide photoCollectionView and noPhotosLabel based on number of photos present
-        self.showHidePhotosLabel()
-        
         //perform fetch
         self.fetchedResultsController.delegate = self
         self.fetchedResultsController.performFetch(nil)
         
         println(selectedPin)
+        
+        //show or hide photoCollectionView and noPhotosLabel based on number of photos present
+        self.showHidePhotosLabel()
         
         //get photos if no photos persisted with Pin
         if self.selectedPin.flickrPhotos.isEmpty {
@@ -89,7 +99,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                 //TODO: NEED BETTER ACTIVITY INDICATOR
                 var gettingPhotosAlert = self.makeGettingPhotosAlert()
                 //display alert
-                println("showing getPhotosAlert")
+//                println("showing getPhotosAlert")
 //                self.presentViewController(gettingPhotosAlert, animated: true, completion: nil)
                 
                 //perform segue if successful
@@ -112,30 +122,106 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
     }
     
-    //gets size for collectionView
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.selectedPin.flickrPhotos.count //FlickrClient.sharedInstance().photoURLs.count
+    //get sections for collectionView
+    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+        return self.fetchedResultsController.sections?.count ?? 0
     }
     
+    //gets size for collectionView
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        //get section info
+        let sectionInfo = self.fetchedResultsController.sections![section] as! NSFetchedResultsSectionInfo
+        
+        //return size of section
+        println("sectionInfo.numberOfObjects = \(sectionInfo.numberOfObjects)")
+        return sectionInfo.numberOfObjects
+    }
+    
+    //when cell is selected, change alpha, add index to selectedIndices
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        //TODO: IMPLEMENT FOR PERSISTENCE
+        
+        //get cell
+        let cell = collectionView.cellForItemAtIndexPath(indexPath) as! PhotoCollectionViewCell
+        
+        //add or remove cell index from selectedIndicies
+        if let index = find(self.selectedIndices, indexPath) {
+            self.selectedIndices.removeAtIndex(index)
+        } else {
+            self.selectedIndices.append(indexPath)
+        }
+        
+        //reconfigure cell
+        //TODO: NEED CELL CONFIG METHOD
+
     }
     
     //cell to be populated
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
-        //create cell
+        //create and configure cell
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCollectionViewCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
-        
-        //get image from retreived URLs
-        if FlickrClient.sharedInstance().photoURLs.count != 0 {
-            let photoURLstring = FlickrClient.sharedInstance().photoURLs[indexPath.row]
-            let photoURL = NSURL(string: photoURLstring)
-            let photoData = NSData(contentsOfURL: photoURL!)
-            cell.cellImageView.image = UIImage(data: photoData!)
-        }
+        self.configureCell(cell, atIndexPath: indexPath)
         
         return cell
+    }
+    
+    //create three fresh arrays when controller is about to make changes
+    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        self.deletedIndexPaths = [NSIndexPath]()
+        self.insertedIndexPaths = [NSIndexPath]()
+        self.updatedIndexPaths = [NSIndexPath]()
+    }
+
+    //called when one or more photos are being added/deleted
+    func controller(controller: NSFetchedResultsController,
+        didChangeObject anObject: AnyObject,
+        atIndexPath indexPath: NSIndexPath?,
+        forChangeType type: NSFetchedResultsChangeType,
+        newIndexPath: NSIndexPath?) {
+            
+            switch type {
+            //keeping track of a new photo object being added, array called back in controllerDidChangeContent
+            case .Insert:
+                self.insertedIndexPaths.append(newIndexPath!)
+                break
+            //keeping track of photo objects being deleted
+            case .Delete:
+                self.deletedIndexPaths.append(indexPath!)
+                break
+            case .Update:
+            //keeping track of updated photo objects, method never expected to be called
+                self.updatedIndexPaths.append(indexPath!)
+            case .Move:
+                //unused
+                break
+            default:
+                break
+            }
+    }
+    
+    
+    //perform collectionView batch updates using info from updated, deleted, inserted index arrays
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        
+        //perform batch update
+        self.photoCollectionView.performBatchUpdates({() -> Void in
+            
+            //inserted photo objects
+            for indexPath in self.insertedIndexPaths {
+                self.photoCollectionView.insertItemsAtIndexPaths([indexPath])
+            }
+            
+            //deleted photo objects
+            for indexPath in self.deletedIndexPaths {
+                self.photoCollectionView.deleteItemsAtIndexPaths([indexPath])
+            }
+            
+            //updated photo objects
+            for indexPath in self.updatedIndexPaths {
+                self.photoCollectionView.reloadItemsAtIndexPaths([indexPath])
+            }
+            
+            }, completion: nil)
     }
 
     override func didReceiveMemoryWarning() {
@@ -143,11 +229,42 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         // Dispose of any resources that can be recreated.
     }
     
+    func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
+        
+        //get flickrPhoto object, set to cell's flickrPhoto param
+        if let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as? FlickrPhoto {
+            println("flickrPhoto found at indexPath")
+            cell.flickrPhoto = flickrPhoto
+            
+            //get image for cell
+            if let cellImg = flickrPhoto.flickrImage {
+                println("made image, setting cell to new image")
+                cell.cellImageView.image! = cellImg
+            } else {
+                println("setting cell to empty image")
+                cell.cellImageView.image = self.makeEmptyImage(cell)
+            }
+        } else {
+            //no flickrPhoto, make blank image
+            println("no flickrPhoto found at indexPath")
+            cell.cellImageView.image! = UIImage()
+        }
+        
+        //adjust alpha if cell is selected
+        if let index = find(self.selectedIndices, indexPath) {
+            cell.alpha = 0.05
+        } else {
+            cell.alpha = 1.0
+        }
+
+    }
+    
     //if no photos exist, hide photoCollectionView and show noPhotosLabel
     func showHidePhotosLabel() {
+        //TODO: WHY IS IT ALWAYS ON???????
         self.noPhotosLabel.text = "No Photos"
         //TODO: MAKE TEXT LOOK PRETTY
-        if FlickrClient.sharedInstance().photoURLs.count == 0 {
+        if /*FlickrClient.sharedInstance().photoURLs.count == 0*/ self.fetchedResultsController.fetchedObjects!.count == 0 {
             self.photoCollectionView.hidden = true
             self.noPhotosLabel.hidden = false
         } else {
