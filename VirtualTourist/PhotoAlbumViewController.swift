@@ -150,7 +150,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     //when cell is selected, change alpha, add index to selectedIndices
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        
+        println("selecting cell at indexPath = \(indexPath)")
         //get cell
         let cell = collectionView.cellForItemAtIndexPath(indexPath) as! PhotoCollectionViewCell
         
@@ -163,6 +163,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //reconfigure cell
         //TODO: NEED CELL CONFIG METHOD
+        self.configureCell(cell, atIndexPath: indexPath)
 
     }
     
@@ -242,7 +243,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     }
     
     func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
-        
+
         //get flickrPhoto object, set to cell's flickrPhoto param
         if let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as? FlickrPhoto {
             println("flickrPhoto found at indexPath")
@@ -251,7 +252,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             //get image for cell
             if let cellImg = flickrPhoto.flickrImage {
                 println("made image, setting cell to new image")
-                cell.cellImageView.image! = cellImg
+                cell.cellImageView.image = cellImg
             } else {
                 println("setting cell to empty image")
                 cell.cellImageView.image = self.makeEmptyImage(cell)
@@ -259,7 +260,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         } else {
             //no flickrPhoto, make blank image
             println("no flickrPhoto found at indexPath")
-            cell.cellImageView.image! = UIImage()
+            cell.cellImageView.image = self.makeEmptyImage(cell)
         }
         
         //adjust alpha if cell is selected
@@ -277,7 +278,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         //TODO: MAKE TEXT LOOK PRETTY
         if bool {
             println("hiding no photos label")
-            self.noPhotosLabel.text = "Has Photos"    //DEBUG ONLY, REMOVE AFTER PHOTOS DISPLAY
+//            self.noPhotosLabel.text = "Has Photos"    //DEBUG ONLY, REMOVE AFTER PHOTOS DISPLAY
+            //TODO:  ACTUALLY DISPLAY PHOTOS
         } else {
             println("displaying no photos label")
             self.noPhotosLabel.text = "No Photos"
@@ -285,8 +287,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //hide noPhotosLabel based on var bool, do opposite for photoCollectionView
         dispatch_async(dispatch_get_main_queue(), {
-            self.noPhotosLabel.hidden = false//bool - CHANGE BACK AFTER PHOTOS DISPLAY
-            self.photoCollectionView.hidden = true//!bool
+            self.noPhotosLabel.hidden = /*false*/bool// - CHANGE BACK AFTER PHOTOS DISPLAY
+            self.photoCollectionView.hidden = /*true*/ !bool
         })
     }
 
