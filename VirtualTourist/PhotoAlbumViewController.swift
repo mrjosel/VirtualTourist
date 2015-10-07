@@ -22,6 +22,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     //Selected Pin variable
     var selectedPin: Pin!
     
+    //image array, get images from flickrPhoto objects and append to local array, use local array to configure images (faster this way)
+    var flickrImgs = [UIImage]()
+    
     // The selected indexes array keeps all of the indexPaths for cells that are "selected". The array is
     // used inside cellForItemAtIndexPath to lower the alpha of selected cells.  You can see how the array
     // works by searchign through the code for 'selectedIndexes'
@@ -61,8 +64,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         //reload all data
         self.photoCollectionView.reloadData()
 
-        //show navBar
+        //show navBar, setup delete button
         self.navigationController?.navigationBar.hidden = false
+//        self.navigationController?.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")
         
         //setup collectionView
         self.photoCollectionView.backgroundColor = UIColor.whiteColor()
@@ -150,7 +155,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     //when cell is selected, change alpha, add index to selectedIndices
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        println("selecting cell at indexPath = \(indexPath)")
+        println("selecting cell at indexPath = \(indexPath.row)")
         //get cell
         let cell = collectionView.cellForItemAtIndexPath(indexPath) as! PhotoCollectionViewCell
         
@@ -162,8 +167,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         
         //reconfigure cell
-        //TODO: NEED CELL CONFIG METHOD
         self.configureCell(cell, atIndexPath: indexPath)
+        
+        //check if selectedIndicies is empty, if so, disable trash button
+//        self.navigationController?.navigationItem.rightBarButtonItem?.enabled = !self.selectedIndices.isEmpty
+        self.navigationItem.rightBarButtonItem?.enabled = !self.selectedIndices.isEmpty
+        //TODO: MAKE BUTTON DISABLED
 
     }
     
@@ -179,7 +188,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     //create three fresh arrays when controller is about to make changes
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
-        println("!!!!!!!!!!!!!!!!!!!!!!CONTROLLER WILL CHANGE CONTENT!!!!!!!!!!!!!!!!!!!!!!")
+        println("CONTROLLER WILL CHANGE CONTENT")
         self.deletedIndexPaths = [NSIndexPath]()
         self.insertedIndexPaths = [NSIndexPath]()
         self.updatedIndexPaths = [NSIndexPath]()
@@ -265,7 +274,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //adjust alpha if cell is selected
         if let index = find(self.selectedIndices, indexPath) {
-            cell.alpha = 0.05
+            cell.alpha = 0.5
         } else {
             cell.alpha = 1.0
         }
@@ -327,6 +336,42 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
             self.newCollectionButton.enabled = true
         })
+    }
+    
+    
+//    func deleteSelectedColors() {
+//        var colorsToDelete = [Color]()
+//        
+//        for indexPath in selectedIndexes {
+//            colorsToDelete.append(fetchedResultsController.objectAtIndexPath(indexPath) as! Color)
+//        }
+//        
+//        for color in colorsToDelete {
+//            sharedContext.deleteObject(color)
+//        }
+//        
+//        selectedIndexes = [NSIndexPath]()
+//    }
+    
+    //if there are indicies in the selectedIndices array, delete those photos
+    func trashSelectedPhotos() {
+        
+        //flickrPhotos to delete array
+        var flickrPhotosToDelete = [FlickrPhoto]()
+        
+        //iterate through selectedIndicies
+        for indexPath in self.selectedIndices {
+            flickrPhotosToDelete.append(self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto)
+        }
+        
+        //iterate through flickrPhotosToDelete and delete from context
+        for flickrPhoto in flickrPhotosToDelete {
+            self.sharedContext.deleteObject(flickrPhoto)
+        }
+        
+        //clear selectedIndicies array
+        self.selectedIndices = [NSIndexPath]()
+        
     }
     
     //create flickrPhoto objects from urlStrings
