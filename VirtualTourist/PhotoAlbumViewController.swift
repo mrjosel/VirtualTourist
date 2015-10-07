@@ -61,12 +61,16 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         //reload all data
         self.photoCollectionView.reloadData()
 
-        
         //show navBar
         self.navigationController?.navigationBar.hidden = false
         
         //setup collectionView
         self.photoCollectionView.backgroundColor = UIColor.whiteColor()
+        self.photoCollectionView.hidden = true
+        
+        //setup noPhotosLabel
+        self.noPhotosLabel.text = "No Photos"
+        self.noPhotosLabel.hidden = true
         
         //set datasource
         self.photoCollectionView.dataSource = self
@@ -94,7 +98,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                 
                 //create gettingPhotosAlert
                 //TODO: NEED BETTER ACTIVITY INDICATOR
-                var gettingPhotosAlert = self.makeGettingPhotosAlert()
+//                var gettingPhotosAlert = self.makeGettingPhotosAlert()
                 //display alert
 //                println("showing getPhotosAlert")
 //                self.presentViewController(gettingPhotosAlert, animated: true, completion: nil)
@@ -102,25 +106,31 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                 //perform segue if successful
                 if success {
                     println("finished retrieving photos")
+                    
+                    //check if photos count is non zero
+                    var hasPhotos: Bool = (self.selectedPin.flickrPhotos.count != 0)
 //                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
                             //reload photos
                             println("selectedPin.flickrPhotos = \(self.selectedPin.flickrPhotos.count)")
+                            //show no photos label depending on whether photos are present or not
+                            self.hideNoPhotosLabel(hasPhotos)
 //                        })
-                    CoreDataStackManager.sharedInstance().saveContext()
                 } else {
                     //alert user to error
                     println("failed to get all photos")
 //                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
                             self.makeAlert(self, title: "Error", error: error)
+                    
+                            //no photos
+                            self.hideNoPhotosLabel(false)
 //                        })
                 }
             }
         } else {
             println("persisted photos present, count = \(self.fetchedResultsController.fetchedObjects!.count)")
+            //show or hide photoCollectionView and noPhotosLabel based on number of photos present
+            self.hideNoPhotosLabel(true)
         }
-        
-        //show or hide photoCollectionView and noPhotosLabel based on number of photos present
-        self.showHidePhotosLabel()
     }
     
     //get sections for collectionView
@@ -168,6 +178,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     //create three fresh arrays when controller is about to make changes
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        println("!!!!!!!!!!!!!!!!!!!!!!CONTROLLER WILL CHANGE CONTENT!!!!!!!!!!!!!!!!!!!!!!")
         self.deletedIndexPaths = [NSIndexPath]()
         self.insertedIndexPaths = [NSIndexPath]()
         self.updatedIndexPaths = [NSIndexPath]()
@@ -260,20 +271,23 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
 
     }
     
-    //if no photos exist, hide photoCollectionView and show noPhotosLabel
-    func showHidePhotosLabel() {
-        //TODO: WHY IS IT ALWAYS ON???????
-        self.noPhotosLabel.text = "No Photos"
+    //hide/show noPhotosLabel
+    func hideNoPhotosLabel(bool: Bool) {
+
         //TODO: MAKE TEXT LOOK PRETTY
-        if /*FlickrClient.sharedInstance().photoURLs.count == 0*/ self.selectedPin.flickrPhotos.count == 0 {
-            println("displaying no photos label")
-            self.photoCollectionView.hidden = true
-            self.noPhotosLabel.hidden = false
-        } else {
+        if bool {
             println("hiding no photos label")
-            self.photoCollectionView.hidden = false
-            self.noPhotosLabel.hidden = true
+            self.noPhotosLabel.text = "Has Photos"    //DEBUG ONLY, REMOVE AFTER PHOTOS DISPLAY
+        } else {
+            println("displaying no photos label")
+            self.noPhotosLabel.text = "No Photos"
         }
+        
+        //hide noPhotosLabel based on var bool, do opposite for photoCollectionView
+        dispatch_async(dispatch_get_main_queue(), {
+            self.noPhotosLabel.hidden = false//bool - CHANGE BACK AFTER PHOTOS DISPLAY
+            self.photoCollectionView.hidden = true//!bool
+        })
     }
 
     //grabs new collection of photos by incrementing page
