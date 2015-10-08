@@ -66,8 +66,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
 
         //show navBar, setup delete button
         self.navigationController?.navigationBar.hidden = false
-//        self.navigationController?.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")
+        self.navigationItem.rightBarButtonItem?.enabled = false
         
         //setup collectionView
         self.photoCollectionView.backgroundColor = UIColor.whiteColor()
@@ -170,9 +170,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         self.configureCell(cell, atIndexPath: indexPath)
         
         //check if selectedIndicies is empty, if so, disable trash button
-//        self.navigationController?.navigationItem.rightBarButtonItem?.enabled = !self.selectedIndices.isEmpty
         self.navigationItem.rightBarButtonItem?.enabled = !self.selectedIndices.isEmpty
-        //TODO: MAKE BUTTON DISABLED
 
     }
     
