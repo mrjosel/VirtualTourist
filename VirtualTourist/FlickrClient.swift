@@ -5,6 +5,8 @@
 //  Created by Brian Josel on 8/25/15.
 //  Copyright (c) 2015 Brian Josel. All rights reserved.
 //
+//  Image caching method copied from FavoriteActors project
+//  Copyright (c) 2015 Jason Schatz.
 
 import Foundation
 
@@ -88,5 +90,10 @@ class FlickrClient {
             static let sharedInstace = FlickrClient()
         }
         return Singleton.sharedInstace
+    }
+    
+    //Caches for caching flickrPhoto images
+    struct Caches {
+        static let imageCache = ImageCache()
     }
 }

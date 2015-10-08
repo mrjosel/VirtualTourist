@@ -186,7 +186,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     //create three fresh arrays when controller is about to make changes
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
-        println("CONTROLLER WILL CHANGE CONTENT")
+        println("willChangeContent")
         self.deletedIndexPaths = [NSIndexPath]()
         self.insertedIndexPaths = [NSIndexPath]()
         self.updatedIndexPaths = [NSIndexPath]()
@@ -198,6 +198,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         atIndexPath indexPath: NSIndexPath?,
         forChangeType type: NSFetchedResultsChangeType,
         newIndexPath: NSIndexPath?) {
+            println("didChangeObject")
             
             switch type {
             //keeping track of a new photo object being added, array called back in controllerDidChangeContent
@@ -219,10 +220,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             }
     }
     
-    
     //perform collectionView batch updates using info from updated, deleted, inserted index arrays
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        
+        println("didChangeContent")
         //perform batch update
         self.photoCollectionView.performBatchUpdates({() -> Void in
             
@@ -250,6 +250,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     }
     
     func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
+        
+        //TODO:  REFACTOR FOR IMAGECACHING
+        //1.) CHECK IF URLSTRING OF FLICKRPHOTO IS NIL OR "", SET TO NO-PHOTO IMAGE
+        //2.) IF IMAGE IS DOWNLOADED AND CACHED, RETRIEVE AND SET TO FLICKRPHOTO IMAGE PARAM
+        //3.) IF URLSTRING PRESENT BUT NO PHOTO CACHED, DOWNLOAD PHOTO USING URLSTRING
 
         //get flickrPhoto object, set to cell's flickrPhoto param
         if let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as? FlickrPhoto {

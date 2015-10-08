@@ -41,7 +41,12 @@ class FlickrPhoto: NSManagedObject {
         
         get {
             println("flickrImage requested")
+            //TODO:  NEED TO IMEPLEMENT IN IMAGE CACHING
             return FlickrClient.sharedInstance().imageFromURLstring(self.urlString)
+        }
+        
+        set {
+            //TODO: NEED SET IMAGE METHOD
         }
     }
 }
