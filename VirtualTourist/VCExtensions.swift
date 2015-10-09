@@ -51,6 +51,8 @@ extension UIViewController {
     func makeEmptyImage(cell: PhotoCollectionViewCell) -> UIImage {
         //get cgsize from cell imgView, make blank image, return
         let size: CGSize = cell.cellImageView.frame.size
+        println("height \(size.height)")
+        println("width \(size.width)")
         UIGraphicsBeginImageContext(size)
         var emptyImg: UIImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()

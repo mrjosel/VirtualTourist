@@ -156,8 +156,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     //when cell is selected, change alpha, add index to selectedIndices
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         println("selecting cell at indexPath = \(indexPath.row)")
-        //get cell
+        //get cell and flickrPhoto
         let cell = collectionView.cellForItemAtIndexPath(indexPath) as! PhotoCollectionViewCell
+        let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
         
         //add or remove cell index from selectedIndicies
         if let index = find(self.selectedIndices, indexPath) {
@@ -167,7 +168,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         
         //reconfigure cell
-        self.configureCell(cell, atIndexPath: indexPath)
+        self.configureCell(cell, withFlickrPhoto: flickrPhoto, atIndexPath: indexPath)
         
         //check if selectedIndicies is empty, if so, disable trash button
         self.navigationItem.rightBarButtonItem?.enabled = !self.selectedIndices.isEmpty
@@ -177,9 +178,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     //cell to be populated
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
-        //create and configure cell
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCollectionViewCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
-        self.configureCell(cell, atIndexPath: indexPath)
+        //get cell and flickrPhoto
+        let cell = collectionView.cellForItemAtIndexPath(indexPath) as! PhotoCollectionViewCell
+        let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
+        self.configureCell(cell, withFlickrPhoto: flickrPhoto, atIndexPath: indexPath)
         
         return cell
     }
@@ -249,12 +251,41 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         // Dispose of any resources that can be recreated.
     }
     
-    func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
-        
-        //TODO:  REFACTOR FOR IMAGECACHING
-        //1.) CHECK IF URLSTRING OF FLICKRPHOTO IS NIL OR "", SET TO NO-PHOTO IMAGE
-        //2.) IF IMAGE IS DOWNLOADED AND CACHED, RETRIEVE AND SET TO FLICKRPHOTO IMAGE PARAM
-        //3.) IF URLSTRING PRESENT BUT NO PHOTO CACHED, DOWNLOAD PHOTO USING URLSTRING
+//    func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto, atIndexPath indexPath: NSIndexPath) {
+//        
+//        //pending image
+//        var cellImage = UIImage(named: "pending-image")
+//        
+//        //check if flickrPhoto .urlString is "", set to no-image
+//        if flickrPhoto.urlString == "" {
+//            cellImage = UIImage(named: "no-image")
+//        } else {
+//            //check if image is downloaded and cached (flickrPhoto optional image param is set)
+//            if let flickrImage = flickrPhoto.flickrImage {
+//                //is downloaded and cached, set
+//                cellImage = flickrImage
+//            } else {
+//                //image needs to be downloaded, attempt to download, if failure, set to no-image
+//                if let flickrImage = FlickrClient.sharedInstance().imageFromURLstring(flickrPhoto.urlString) {
+//                    cellImage = flickrImage
+//                } else {
+//                    cellImage = UIImage(named: "no-image")
+//                }
+//            }
+//            
+//            //set image of cell
+//            cell.cellImageView!.image = cellImage
+//            
+//            //adjust alpha if cell is selected
+//            if let index = find(self.selectedIndices, indexPath) {
+//                cell.alpha = 0.5
+//            } else {
+//                cell.alpha = 1.0
+//            }
+//        }
+//    }
+    
+    func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto, atIndexPath indexPath: NSIndexPath) {
 
         //get flickrPhoto object, set to cell's flickrPhoto param
         if let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as? FlickrPhoto {
