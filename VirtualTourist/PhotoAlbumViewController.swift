@@ -179,7 +179,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
         //get cell and flickrPhoto
-        let cell = collectionView.cellForItemAtIndexPath(indexPath) as! PhotoCollectionViewCell
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCollectionViewCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
         let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
         self.configureCell(cell, withFlickrPhoto: flickrPhoto, atIndexPath: indexPath)
         
@@ -251,69 +251,69 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         // Dispose of any resources that can be recreated.
     }
     
-//    func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto, atIndexPath indexPath: NSIndexPath) {
-//        
-//        //pending image
-//        var cellImage = UIImage(named: "pending-image")
-//        
-//        //check if flickrPhoto .urlString is "", set to no-image
-//        if flickrPhoto.urlString == "" {
-//            cellImage = UIImage(named: "no-image")
-//        } else {
-//            //check if image is downloaded and cached (flickrPhoto optional image param is set)
-//            if let flickrImage = flickrPhoto.flickrImage {
-//                //is downloaded and cached, set
-//                cellImage = flickrImage
-//            } else {
-//                //image needs to be downloaded, attempt to download, if failure, set to no-image
-//                if let flickrImage = FlickrClient.sharedInstance().imageFromURLstring(flickrPhoto.urlString) {
-//                    cellImage = flickrImage
-//                } else {
-//                    cellImage = UIImage(named: "no-image")
-//                }
-//            }
-//            
-//            //set image of cell
-//            cell.cellImageView!.image = cellImage
-//            
-//            //adjust alpha if cell is selected
-//            if let index = find(self.selectedIndices, indexPath) {
-//                cell.alpha = 0.5
-//            } else {
-//                cell.alpha = 1.0
-//            }
-//        }
-//    }
-    
     func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto, atIndexPath indexPath: NSIndexPath) {
-
-        //get flickrPhoto object, set to cell's flickrPhoto param
-        if let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as? FlickrPhoto {
-            println("flickrPhoto found at indexPath")
-            cell.flickrPhoto = flickrPhoto
-            
-            //get image for cell
-            if let cellImg = flickrPhoto.flickrImage {
-                println("made image, setting cell to new image")
-                cell.cellImageView.image = cellImg
-            } else {
-                println("setting cell to empty image")
-                cell.cellImageView.image = self.makeEmptyImage(cell)
-            }
-        } else {
-            //no flickrPhoto, make blank image
-            println("no flickrPhoto found at indexPath")
-            cell.cellImageView.image = self.makeEmptyImage(cell)
-        }
         
-        //adjust alpha if cell is selected
-        if let index = find(self.selectedIndices, indexPath) {
-            cell.alpha = 0.5
+        //pending image
+        var cellImage = UIImage(named: "pending-image")
+        
+        //check if flickrPhoto .urlString is "", set to no-image
+        if flickrPhoto.urlString == "" {
+            cellImage = UIImage(named: "no-image")
         } else {
-            cell.alpha = 1.0
+            //check if image is downloaded and cached (flickrPhoto optional image param is set)
+            if let flickrImage = flickrPhoto.flickrImage {
+                //is downloaded and cached, set
+                cellImage = flickrImage
+            } else {
+                //image needs to be downloaded, attempt to download, if failure, set to no-image
+                if let flickrImage = FlickrClient.sharedInstance().imageFromURLstring(flickrPhoto.urlString) {
+                    cellImage = flickrImage
+                } else {
+                    cellImage = UIImage(named: "no-image")
+                }
+            }
+            
+            //set image of cell
+            cell.cellImageView!.image = cellImage
+            
+            //adjust alpha if cell is selected
+            if let index = find(self.selectedIndices, indexPath) {
+                cell.alpha = 0.5
+            } else {
+                cell.alpha = 1.0
+            }
         }
-
     }
+    
+//    func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto, atIndexPath indexPath: NSIndexPath) {
+//
+//        //get flickrPhoto object, set to cell's flickrPhoto param
+//        if let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as? FlickrPhoto {
+//            println("flickrPhoto found at indexPath")
+//            cell.flickrPhoto = flickrPhoto
+//            
+//            //get image for cell
+//            if let cellImg = flickrPhoto.flickrImage {
+//                println("made image, setting cell to new image")
+//                cell.cellImageView.image = cellImg
+//            } else {
+//                println("setting cell to empty image")
+//                cell.cellImageView.image = self.makeEmptyImage(cell)
+//            }
+//        } else {
+//            //no flickrPhoto, make blank image
+//            println("no flickrPhoto found at indexPath")
+//            cell.cellImageView.image = self.makeEmptyImage(cell)
+//        }
+//        
+//        //adjust alpha if cell is selected
+//        if let index = find(self.selectedIndices, indexPath) {
+//            cell.alpha = 0.5
+//        } else {
+//            cell.alpha = 1.0
+//        }
+//
+//    }
     
     //hide/show noPhotosLabel
     func hideNoPhotosLabel(bool: Bool) {
