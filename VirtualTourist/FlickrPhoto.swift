@@ -16,8 +16,9 @@ import UIKit
 class FlickrPhoto: NSManagedObject {
     
     //managed variables
-    @NSManaged var urlString: String!
+    @NSManaged var urlString: String?
     @NSManaged var pin: Pin?
+    @NSManaged var title: String?
 
     //called in init
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
@@ -25,7 +26,7 @@ class FlickrPhoto: NSManagedObject {
     }
     
     //initializer
-    init(urlString: String, context: NSManagedObjectContext) {
+    init(urlString: String?, context: NSManagedObjectContext) {
         
         //create entity
         let entity = NSEntityDescription.entityForName("FlickrPhoto", inManagedObjectContext: context)
@@ -34,7 +35,9 @@ class FlickrPhoto: NSManagedObject {
         super.init(entity: entity!, insertIntoManagedObjectContext: context)
         
         //set parameters
-        self.urlString = urlString
+        if let urlString = urlString {
+            self.urlString = urlString
+        }
     }
     
     var flickrImage : UIImage? {
@@ -42,7 +45,9 @@ class FlickrPhoto: NSManagedObject {
         get {
             println("flickrImage requested")
             //TODO:  NEED TO IMEPLEMENT IN IMAGE CACHING
-            return FlickrClient.sharedInstance().imageFromURLstring(self.urlString)
+//            return FlickrClient.sharedInstance().imageFromURLstring(self.urlString)
+            return FlickrClient.Caches.imageCache.imageFromURLString(self.urlString)
+            
         }
         
         set {

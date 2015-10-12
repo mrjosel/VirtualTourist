@@ -15,14 +15,14 @@ class ImageCache {
     
     // MARK: - Retreiving images
     
-    func imageWithIdentifier(identifier: String?) -> UIImage? {
+    func imageFromURLString(urlString: String?) -> UIImage? {
         
         // If the identifier is nil, or empty, return nil
-        if identifier == nil || identifier! == "" {
+        if urlString == nil || urlString! == "" {
             return nil
         }
         
-        let path = pathForIdentifier(identifier!)
+        let path = pathForIdentifier(urlString!)
         var data: NSData?
         
         // First try the memory cache

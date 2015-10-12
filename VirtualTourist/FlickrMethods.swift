@@ -72,7 +72,8 @@ extension FlickrClient {
                 println("successful GET request in getPhotos")
                 //get array of urlStrings for photos in result
                 if let parsedJSON = result as? [String: AnyObject] {
-                    println("successfully casted JSON to [[String: AnyObject]]")
+                    println("successfully casted JSON to [String: AnyObject]")
+                    println(parsedJSON)
                     if let photosDict = parsedJSON[FlickrClient.Response.PHOTOS] as? [String: AnyObject] {
                         println("successfully retrieved photosDict as [String: AnyObject]")
                         if let photosArray = photosDict[FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
@@ -115,7 +116,9 @@ extension FlickrClient {
         secret: 1e92283336
         size: m - THIS IS OPTIONAL, WILL USE m IN ALL PHOTOS
         */
-        
+        //TODO:     REFACTOR INTO ONE METHOD THAT MAKES FLICKRPHOTO OBJECTS
+        //          MAKE FLICKRPHOTO METHOD TO RETURN URL STRING BASED ON SAVED PARAMS BELOW
+        //          USE photo[FlickrClient.Response.TITLE] as! String TO GET FLICKRPHOTO TITLE FOR SAVING TO PATH METHOD
         //output array of photoURLstrings
         var outputDict = [String: AnyObject]()
         var urlArray = [String]()

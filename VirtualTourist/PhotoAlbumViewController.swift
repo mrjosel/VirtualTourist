@@ -266,7 +266,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                 cellImage = flickrImage
             } else {
                 //image needs to be downloaded, attempt to download, if failure, set to no-image
-                if let flickrImage = FlickrClient.sharedInstance().imageFromURLstring(flickrPhoto.urlString) {
+                if let flickrImage = FlickrClient.sharedInstance().imageFromURLstring(flickrPhoto.urlString!) {
                     cellImage = flickrImage
                 } else {
                     cellImage = UIImage(named: "no-image")
