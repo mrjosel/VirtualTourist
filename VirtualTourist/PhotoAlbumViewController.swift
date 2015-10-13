@@ -94,54 +94,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         self.fetchedResultsController.delegate = self
         self.fetchedResultsController.performFetch(nil)
         
-        println(selectedPin)
-        
         //get photos if no photos persisted with Pin
         if self.selectedPin.flickrPhotos.isEmpty {
-            println("no photos persisted, getting photos")
-//            self.getPhotos(selectedPin, page: selectedPin.page as? Int, perPage: FlickrClient.sharedInstance().perPage) { success, error in
-            FlickrClient.sharedInstance().getPhotos(self.selectedPin, perPage: FlickrClient.sharedInstance().perPage) { success, result, error in 
-                //create gettingPhotosAlert
-                //TODO: NEED BETTER ACTIVITY INDICATOR
-//                var gettingPhotosAlert = self.makeGettingPhotosAlert()
-                //display alert
-//                println("showing getPhotosAlert")
-//                self.presentViewController(gettingPhotosAlert, animated: true, completion: nil)
-                //successfully retreived result
-                if success {
-                    println("finished retrieving photos")
-                    //check if there are photos
-                    println(result)
-                    var hasPhotos: Bool = ((result![FlickrClient.Response.TOTAL] as! String).toInt() != 0)
-                    if hasPhotos {
-                        //get array of dicts, each dict is a flickrPhoto object
-                        if let photoDicts = result![FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
-                            //parse each dict and create flickrPhoto object
-                            var flickrPhoto = photoDicts.map() { (dict: [String: AnyObject]) -> FlickrPhoto in
-                                let flickrPhoto = FlickrPhoto(dictionary: dict, context: self.sharedContext)
-                                flickrPhoto.pin = self.selectedPin
-                                return flickrPhoto
-                            }
-                        }
-                    }
-                    
-//                    gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
-                        //reload photos
-                        println("selectedPin.flickrPhotos = \(self.selectedPin.flickrPhotos.count)")
-                        //show no photos label depending on whether photos are present or not
-                        self.hideNoPhotosLabel(hasPhotos)
-//                        })
-                } else {
-                    //alert user to error
-                    println("failed to get all photos")
-//                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
-                            self.makeAlert(self, title: "Error", error: error)
-                    
-                            //no photos
-                            self.hideNoPhotosLabel(false)
-//                        })
-                }
-            }
+            //get photos
+            self.getPhotos({() -> Void in
+                println("ALL FINISHED")
+            })
         } else {
             println("persisted photos present, count = \(self.fetchedResultsController.fetchedObjects!.count)")
             //show or hide photoCollectionView and noPhotosLabel based on number of photos present
@@ -179,7 +137,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         
         //reconfigure cell
-        self.configureCell(cell, withFlickrPhoto: flickrPhoto, atIndexPath: indexPath)
+        self.configureCell(cell, atIndexPath: indexPath)
         
         //check if selectedIndicies is empty, if so, disable trash button
         self.navigationItem.rightBarButtonItem?.enabled = !self.selectedIndices.isEmpty
@@ -192,7 +150,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         //get cell and flickrPhoto
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCollectionViewCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
         let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
-        self.configureCell(cell, withFlickrPhoto: flickrPhoto, atIndexPath: indexPath)
+        self.configureCell(cell, atIndexPath: indexPath)
         
         return cell
     }
@@ -262,13 +220,16 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         // Dispose of any resources that can be recreated.
     }
     
-    func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto, atIndexPath indexPath: NSIndexPath) {
+    func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
+        
+        //get flickPhoto at indexPath
+        let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
         
         //pending image
         var cellImage = UIImage(named: "pending-image")
         
         //check if flickrPhoto .urlString is "", set to no-image
-        if flickrPhoto.urlString == "" {
+        if flickrPhoto.urlString == "" || flickrPhoto.urlString == nil {
             cellImage = UIImage(named: "no-image")
         } else {
             //check if image is downloaded and cached (flickrPhoto optional image param is set)
@@ -295,36 +256,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             }
         }
     }
-    
-//    func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto, atIndexPath indexPath: NSIndexPath) {
-//
-//        //get flickrPhoto object, set to cell's flickrPhoto param
-//        if let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as? FlickrPhoto {
-//            println("flickrPhoto found at indexPath")
-//            cell.flickrPhoto = flickrPhoto
-//            
-//            //get image for cell
-//            if let cellImg = flickrPhoto.flickrImage {
-//                println("made image, setting cell to new image")
-//                cell.cellImageView.image = cellImg
-//            } else {
-//                println("setting cell to empty image")
-//                cell.cellImageView.image = self.makeEmptyImage(cell)
-//            }
-//        } else {
-//            //no flickrPhoto, make blank image
-//            println("no flickrPhoto found at indexPath")
-//            cell.cellImageView.image = self.makeEmptyImage(cell)
-//        }
-//        
-//        //adjust alpha if cell is selected
-//        if let index = find(self.selectedIndices, indexPath) {
-//            cell.alpha = 0.5
-//        } else {
-//            cell.alpha = 1.0
-//        }
-//
-//    }
     
     //hide/show noPhotosLabel
     func hideNoPhotosLabel(bool: Bool) {
@@ -361,42 +292,26 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         
         //begin alertView while retrieving photos
-        var gettingPhotosAlert = self.makeGettingPhotosAlert()
+//        var gettingPhotosAlert = self.makeGettingPhotosAlert()
+        
+        //remove all photos
+        self.deleteAllFlickrPhotos(self.selectedPin)
         
         //get photos, overwrites existing collection
-//        self.getPhotos(self.selectedPin, page: self.selectedPin.page as? Int, perPage: FlickrClient.sharedInstance().perPage) { success, error in
-//            
-//            //if success, update collection table
-//            if success {
-//                dispatch_async(dispatch_get_main_queue(), {
-//                    self.photoCollectionView.reloadData()
-//                })
-//            } else {
-//                //alert user
-//                println("failed to get new collection")
-//                self.makeAlert(self, title: "Error", error: error)
-//            }
-//        }
-        //end alertView,enable newCollectionButton upon completion
-        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+        
+        //TODO: WHY DO PHOTOS SHOW UP OUT OF ORDER??????????????????????
+        
+        
+        self.getPhotos({() -> Void in
             self.newCollectionButton.enabled = true
+            println("NEW COLLECTION")
         })
+        
+        //end alertView,enable newCollectionButton upon completion
+//        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+//            self.newCollectionButton.enabled = true
+//        })
     }
-    
-    
-//    func deleteSelectedColors() {
-//        var colorsToDelete = [Color]()
-//        
-//        for indexPath in selectedIndexes {
-//            colorsToDelete.append(fetchedResultsController.objectAtIndexPath(indexPath) as! Color)
-//        }
-//        
-//        for color in colorsToDelete {
-//            sharedContext.deleteObject(color)
-//        }
-//        
-//        selectedIndexes = [NSIndexPath]()
-//    }
     
     //if there are indicies in the selectedIndices array, delete those photos
     func trashSelectedPhotos() {
@@ -419,47 +334,57 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
     }
     
-//    //create flickrPhoto objects from urlStrings
-//    func makeFlickrPhotos(urlStrings: [String]) /*-> [FlickrPhoto]*/ {
-//        println("making flickrPhoto objects")
-//
-//        //map returned urlStrings into flickrPhoto objects
-//        var flickrPhotos = urlStrings.map() { (urlString: String) -> FlickrPhoto in
-//            
-//            //create flickrPhoto and set pin param as selectedPin
-//            let flickrPhoto = FlickrPhoto(urlString: urlString, context: self.sharedContext)
-//            flickrPhoto.pin = self.selectedPin
-//            
-//            return flickrPhoto
-//        }
-//        
-//        println("returning flickrPhotos")
-//    }
+    //remove all flicrPhotos
+    func deleteAllFlickrPhotos(pin: Pin) {
+        for flickrPhoto in self.fetchedResultsController.fetchedObjects as! [FlickrPhoto] {
+            self.sharedContext.deleteObject(flickrPhoto)
+        }
+    }
     
-//    //get photos using pin cooridinate
-//    func getPhotos(pin: Pin, page: Int?, perPage: Int, completionHandler: (success: Bool, error: NSError?) -> Void) {
-//        println("GETTING PHOTOS")
-//        //pass pin into FlickrClient
-//        FlickrClient.sharedInstance().getPhotoURLs(pin, page: page, perPage: perPage) { success, result, error in
-//            var error: NSError?
-//            if !success {
-//                //create error
-//                println("couldn't get photo urls")
-//                error = self.errorHandle("getPhotos", errorString: "Failed to Retrieve Photos")
-//            } else {
-//                //retrieved photoURLs
-//                println("got all the photos")
-//                error = nil
-//                pin.pages = result![FlickrClient.OutputData.PAGES] as! Int
-//                println("pin.pages = \(pin.pages)")
-//                var urlStrings = pin.pages == 0 ? [] : result![FlickrClient.OutputData.URLS] as! [String]
-//                self.makeFlickrPhotos(urlStrings)
-//            }
-//            //complete with handler
-//            completionHandler(success: success, error: error)
-//        }
-//    }
+    //get photos using pin cooridinate
+    func getPhotos(completion: () -> Void) {
+        println("GETTING PHOTOS")
+        //pass pin into FlickrClient
+        println("no photos persisted, getting photos")
+        FlickrClient.sharedInstance().getPhotos(self.selectedPin, perPage: FlickrClient.sharedInstance().perPage) { success, result, error in
+            //successfully retreived result
+            if success {
+                println("finished retrieving photos")
+                //check if there are photos
+                println(result)
+                var hasPhotos: Bool = ((result![FlickrClient.Response.TOTAL] as! String).toInt() != 0)
+                if hasPhotos {
+                    //get array of dicts, each dict is a flickrPhoto object
+                    if let photoDicts = result![FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
+                        //parse each dict and create flickrPhoto object
+                        var flickrPhoto = photoDicts.map() { (dict: [String: AnyObject]) -> FlickrPhoto in
+                            let flickrPhoto = FlickrPhoto(dictionary: dict, context: self.sharedContext)
+                            flickrPhoto.pin = self.selectedPin
+                            return flickrPhoto
+                        }
+                    }
+                }
+                
+                //reload photos
+                println("selectedPin.flickrPhotos = \(self.selectedPin.flickrPhotos.count)")
+                //show no photos label depending on whether photos are present or not
+                self.hideNoPhotosLabel(hasPhotos)
+            } else {
+                //alert user to error
+                println("failed to get all photos")
+                self.makeAlert(self, title: "Error", error: error)
+                
+                //no photos
+                self.hideNoPhotosLabel(false)
+            }
+             completion()
+        }
+    }
     
+    override func viewWillDisappear(animated: Bool) {
+        CoreDataStackManager.sharedInstance().saveContext()
+    }
+
     /*
     // MARK: - Navigation
 

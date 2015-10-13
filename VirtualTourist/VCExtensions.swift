@@ -13,40 +13,6 @@ import MapKit
 //methods shared by VCs
 extension UIViewController {
     
-//    //create flickrPhoto objects from urlStrings
-//    func makeFlickrPhotos(urlStrings: [String]) -> [FlickrPhoto] {
-//        //return value
-//        var flickrPhotos : [FlickrPhoto]
-//        
-//        for urlString in urlStrings {
-//            var flickrPhoto = FlickrPhoto(urlString: urlString, context: self.sharedContext)
-//        }
-//    }
-//
-//    //get photos using pin cooridinate
-//    func getPhotos(pin: /*MKAnnotationView*/Pin, page: Int, perPage: Int, completionHandler: (success: Bool, error: NSError?) -> Void) {
-//        println("GETTING PHOTOS")
-//        //pass pin into FlickrClient
-//        FlickrClient.sharedInstance().getPhotoURLs(pin, page: page, perPage: perPage) { success, result, error in
-//            var error: NSError?
-//            if !success {
-//                //create error
-//                println("couldn't get photo urls")
-//                error = self.errorHandle("getPhotos", errorString: "Failed to Retrieve Photos")
-//            } else {
-//                //retrieved photoURLs
-//                println("got all the photos")
-//                error = nil
-////                FlickrClient.sharedInstance().maxPages = result![FlickrClient.OutputData.PAGES] as? Int
-//                pin.pages = result![FlickrClient.OutputData.PAGES] as? Int
-////                FlickrClient.sharedInstance().photoURLs = FlickrClient.sharedInstance().maxPages == 0 ? [] : result![FlickrClient.OutputData.URLS] as! [String] //REPLACE WITH CORE DATA
-//                pin.flickrPhotos = pin.pages == 0 ? [] : result![FlickrClient.OutputData.URLS] as! [String]
-//            }
-//            //complete with handler
-//            completionHandler(success: success, error: error)
-//        }
-//    }
-    
     //empty Image
     func makeEmptyImage(cell: PhotoCollectionViewCell) -> UIImage {
         //get cgsize from cell imgView, make blank image, return
