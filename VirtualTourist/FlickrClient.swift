@@ -75,6 +75,7 @@ class FlickrClient {
         static let SERVER = "server"
         static let SECRET = "secret"
         static let PAGES = "pages"
+        static let TOTAL = "total"
 
     }
     

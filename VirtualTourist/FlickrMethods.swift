@@ -44,7 +44,7 @@ extension FlickrClient {
     }
     
     //get all photos using MKAnnotationView
-    func getPhotoURLs(pin: Pin, page: Int?, perPage: Int, completionHandler: (success: Bool, result: [String: AnyObject]?, error: NSError?) -> Void) {
+    func getPhotos(pin: Pin, perPage: Int, completionHandler: (success: Bool, result: [String: AnyObject]?, error: NSError?) -> Void) {
         
         //get lat and lon values
         let lat = pin.coordinate.latitude
@@ -54,7 +54,7 @@ extension FlickrClient {
         let params : [String: AnyObject] = [
             FlickrClient.Params.LAT : lat,
             FlickrClient.Params.LON : lon,
-            FlickrClient.Params.PAGE : page != nil ? page! : 1,
+            FlickrClient.Params.PAGE : pin.page != nil ? pin.page! : 1,
             FlickrClient.Params.PER_PAGE : perPage
         ]
         
@@ -73,27 +73,28 @@ extension FlickrClient {
                 //get array of urlStrings for photos in result
                 if let parsedJSON = result as? [String: AnyObject] {
                     println("successfully casted JSON to [String: AnyObject]")
-                    println(parsedJSON)
-                    if let photosDict = parsedJSON[FlickrClient.Response.PHOTOS] as? [String: AnyObject] {
-                        println("successfully retrieved photosDict as [String: AnyObject]")
-                        if let photosArray = photosDict[FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
+//                    println(parsedJSON)
+//                    if let photosDict = parsedJSON[FlickrClient.Response.PHOTOS] as? [String: AnyObject] {
+//                        println("successfully retrieved photosDict as [String: AnyObject]")
+//                        if let photosArray = photosDict[FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
                             //add array of urlStrings to dict
-                            var photoURLstrings = self.makePhotoURLs(photosArray)
+//                            var photoURLstrings = self.makePhotoURLs(photosArray)
                             
                             //add key/val pair for number of pages in result
-                            photoURLstrings[FlickrClient.OutputData.PAGES] = photosDict[FlickrClient.Response.PAGES] as! Int
+//                            /*photoURLstrings*/photosArray[0] = [FlickrClient.OutputData.PAGES] : (photosDict[FlickrClient.Response.PAGES] as! Int)]
                             
-                            //complete with handler
-                            completionHandler(success: true, result: photoURLstrings, error: nil)
-                        } else {
-                            println("failed to retrieve photosArray")
-                            completionHandler(success: false, result: nil, error: NSError(domain: "retrieving photosDict", code: 999, userInfo: nil))
-                        }
-                    } else {
-                        //failed to cast photosDict
-                        println("failed to cast photosDict")
-                        completionHandler(success: false, result: nil, error: NSError(domain: "casting photoDict", code: 999, userInfo: nil))
-                    }
+                            //get photos portion and complete with handler
+                            let photosResult = parsedJSON[FlickrClient.Response.PHOTOS] as! [String: AnyObject]
+                            completionHandler(success: true, result: /*photoURLstrings*/photosResult, error: nil)
+//                        } else {
+//                            println("failed to retrieve photosArray")
+//                            completionHandler(success: false, result: nil, error: NSError(domain: "retrieving photosDict", code: 999, userInfo: nil))
+//                        }
+//                    } else {
+//                        //failed to cast photosDict
+//                        println("failed to cast photosDict")
+//                        completionHandler(success: false, result: nil, error: NSError(domain: "casting photoDict", code: 999, userInfo: nil))
+//                    }
                 } else {
                     //casting of result to [[String: AnyObject]] failed
                     println("casting of result to [[String: AnyObject]] failed")
@@ -105,44 +106,44 @@ extension FlickrClient {
     
     //makes photo URLs from dictionary of photo data from JSON
     //resut is a dict so that getPhotoURLs can also add key/val pair for number of pages
-    func makePhotoURLs(photoArray: [[String: AnyObject]]) -> [String: AnyObject] {
-        /*******FORMAT OF URL BASED ON DICT KEY/VALS
-        
-        https://farm1.staticflickr.com/2/1418878_1e92283336_m.jpg
-        
-        farm-id: 1
-        server-id: 2
-        photo-id: 1418878
-        secret: 1e92283336
-        size: m - THIS IS OPTIONAL, WILL USE m IN ALL PHOTOS
-        */
-        //TODO:     REFACTOR INTO ONE METHOD THAT MAKES FLICKRPHOTO OBJECTS
-        //          MAKE FLICKRPHOTO METHOD TO RETURN URL STRING BASED ON SAVED PARAMS BELOW
-        //          USE photo[FlickrClient.Response.TITLE] as! String TO GET FLICKRPHOTO TITLE FOR SAVING TO PATH METHOD
-        //output array of photoURLstrings
-        var outputDict = [String: AnyObject]()
-        var urlArray = [String]()
-        if photoArray.count > 0 {
-            for photo in photoArray {
-                //get params for URL
-                let farmID = photo[FlickrClient.Response.FARM] as! Int
-                let serverID = photo[FlickrClient.Response.SERVER] as! String
-                let photoID = photo[FlickrClient.Response.ID] as! String
-                let secret = photo[FlickrClient.Response.SECRET] as! String
-                //TODO: WHY DOES CASTING TO INT ON FARMID WORK BUT NOT ON SERVERID????
-                
-                //construct URLstring
-                let urlString = "https://farm\(farmID).staticflickr.com/\(serverID)/\(photoID)_\(secret)_m.jpg"
-
-                //append to outputArray
-                urlArray.append(urlString)
-                
-                outputDict[FlickrClient.OutputData.URLS] = urlArray
-            }
-        }
-        
-        return outputDict
-    }
+//    func makePhotoURLs(photoArray: [[String: AnyObject]]) -> [String: AnyObject] {
+//        /*******FORMAT OF URL BASED ON DICT KEY/VALS
+//        
+//        https://farm1.staticflickr.com/2/1418878_1e92283336_m.jpg
+//        
+//        farm-id: 1
+//        server-id: 2
+//        photo-id: 1418878
+//        secret: 1e92283336
+//        size: m - THIS IS OPTIONAL, WILL USE m IN ALL PHOTOS
+//        */
+//        //TODO:     REFACTOR INTO ONE METHOD THAT MAKES FLICKRPHOTO OBJECTS
+//        //          MAKE FLICKRPHOTO METHOD TO RETURN URL STRING BASED ON SAVED PARAMS BELOW
+//        //          USE photo[FlickrClient.Response.TITLE] as! String TO GET FLICKRPHOTO TITLE FOR SAVING TO PATH METHOD
+//        //output array of photoURLstrings
+//        var outputDict = [String: AnyObject]()
+//        var urlArray = [String]()
+//        if photoArray.count > 0 {
+//            for photo in photoArray {
+//                //get params for URL
+//                let farmID = photo[FlickrClient.Response.FARM] as! Int
+//                let serverID = photo[FlickrClient.Response.SERVER] as! String
+//                let photoID = photo[FlickrClient.Response.ID] as! String
+//                let secret = photo[FlickrClient.Response.SECRET] as! String
+//                //TODO: WHY DOES CASTING TO INT ON FARMID WORK BUT NOT ON SERVERID????
+//                
+//                //construct URLstring
+//                let urlString = "https://farm\(farmID).staticflickr.com/\(serverID)/\(photoID)_\(secret)_m.jpg"
+//
+//                //append to outputArray
+//                urlArray.append(urlString)
+//                
+//                outputDict[FlickrClient.OutputData.URLS] = urlArray
+//            }
+//        }
+//        
+//        return outputDict
+//    }
     
     //getting image using urlString
     func imageFromURLstring(urlString: String) -> UIImage? {

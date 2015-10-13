@@ -47,7 +47,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //create fetch request with sort descriptor
         let fetchRequest = NSFetchRequest(entityName: "FlickrPhoto")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "urlString", ascending: true)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         fetchRequest.predicate = NSPredicate(format: "pin == %@", self.selectedPin);
         
         //create controller from fetch request
@@ -99,26 +99,37 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         //get photos if no photos persisted with Pin
         if self.selectedPin.flickrPhotos.isEmpty {
             println("no photos persisted, getting photos")
-            self.getPhotos(selectedPin, page: selectedPin.page as? Int, perPage: FlickrClient.sharedInstance().perPage) { success, error in
-                
+//            self.getPhotos(selectedPin, page: selectedPin.page as? Int, perPage: FlickrClient.sharedInstance().perPage) { success, error in
+            FlickrClient.sharedInstance().getPhotos(self.selectedPin, perPage: FlickrClient.sharedInstance().perPage) { success, result, error in 
                 //create gettingPhotosAlert
                 //TODO: NEED BETTER ACTIVITY INDICATOR
 //                var gettingPhotosAlert = self.makeGettingPhotosAlert()
                 //display alert
 //                println("showing getPhotosAlert")
 //                self.presentViewController(gettingPhotosAlert, animated: true, completion: nil)
-                
-                //perform segue if successful
+                //successfully retreived result
                 if success {
                     println("finished retrieving photos")
+                    //check if there are photos
+                    println(result)
+                    var hasPhotos: Bool = ((result![FlickrClient.Response.TOTAL] as! String).toInt() != 0)
+                    if hasPhotos {
+                        //get array of dicts, each dict is a flickrPhoto object
+                        if let photoDicts = result![FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
+                            //parse each dict and create flickrPhoto object
+                            var flickrPhoto = photoDicts.map() { (dict: [String: AnyObject]) -> FlickrPhoto in
+                                let flickrPhoto = FlickrPhoto(dictionary: dict, context: self.sharedContext)
+                                flickrPhoto.pin = self.selectedPin
+                                return flickrPhoto
+                            }
+                        }
+                    }
                     
-                    //check if photos count is non zero
-                    var hasPhotos: Bool = (self.selectedPin.flickrPhotos.count != 0)
-//                        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
-                            //reload photos
-                            println("selectedPin.flickrPhotos = \(self.selectedPin.flickrPhotos.count)")
-                            //show no photos label depending on whether photos are present or not
-                            self.hideNoPhotosLabel(hasPhotos)
+//                    gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
+                        //reload photos
+                        println("selectedPin.flickrPhotos = \(self.selectedPin.flickrPhotos.count)")
+                        //show no photos label depending on whether photos are present or not
+                        self.hideNoPhotosLabel(hasPhotos)
 //                        })
                 } else {
                     //alert user to error
@@ -243,7 +254,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                 self.photoCollectionView.reloadItemsAtIndexPaths([indexPath])
             }
             
-            }, completion: nil)
+            }, completion: {(Bool) -> Void in CoreDataStackManager.sharedInstance().saveContext()})
     }
 
     override func didReceiveMemoryWarning() {
@@ -353,19 +364,19 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         var gettingPhotosAlert = self.makeGettingPhotosAlert()
         
         //get photos, overwrites existing collection
-        self.getPhotos(self.selectedPin, page: self.selectedPin.page as? Int, perPage: FlickrClient.sharedInstance().perPage) { success, error in
-            
-            //if success, update collection table
-            if success {
-                dispatch_async(dispatch_get_main_queue(), {
-                    self.photoCollectionView.reloadData()
-                })
-            } else {
-                //alert user
-                println("failed to get new collection")
-                self.makeAlert(self, title: "Error", error: error)
-            }
-        }
+//        self.getPhotos(self.selectedPin, page: self.selectedPin.page as? Int, perPage: FlickrClient.sharedInstance().perPage) { success, error in
+//            
+//            //if success, update collection table
+//            if success {
+//                dispatch_async(dispatch_get_main_queue(), {
+//                    self.photoCollectionView.reloadData()
+//                })
+//            } else {
+//                //alert user
+//                println("failed to get new collection")
+//                self.makeAlert(self, title: "Error", error: error)
+//            }
+//        }
         //end alertView,enable newCollectionButton upon completion
         gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
             self.newCollectionButton.enabled = true
@@ -408,47 +419,47 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
     }
     
-    //create flickrPhoto objects from urlStrings
-    func makeFlickrPhotos(urlStrings: [String]) /*-> [FlickrPhoto]*/ {
-        println("making flickrPhoto objects")
-
-        //map returned urlStrings into flickrPhoto objects
-        var flickrPhotos = urlStrings.map() { (urlString: String) -> FlickrPhoto in
-            
-            //create flickrPhoto and set pin param as selectedPin
-            let flickrPhoto = FlickrPhoto(urlString: urlString, context: self.sharedContext)
-            flickrPhoto.pin = self.selectedPin
-            
-            return flickrPhoto
-        }
-        
-        println("returning flickrPhotos")
-    }
+//    //create flickrPhoto objects from urlStrings
+//    func makeFlickrPhotos(urlStrings: [String]) /*-> [FlickrPhoto]*/ {
+//        println("making flickrPhoto objects")
+//
+//        //map returned urlStrings into flickrPhoto objects
+//        var flickrPhotos = urlStrings.map() { (urlString: String) -> FlickrPhoto in
+//            
+//            //create flickrPhoto and set pin param as selectedPin
+//            let flickrPhoto = FlickrPhoto(urlString: urlString, context: self.sharedContext)
+//            flickrPhoto.pin = self.selectedPin
+//            
+//            return flickrPhoto
+//        }
+//        
+//        println("returning flickrPhotos")
+//    }
     
-    //get photos using pin cooridinate
-    func getPhotos(pin: Pin, page: Int?, perPage: Int, completionHandler: (success: Bool, error: NSError?) -> Void) {
-        println("GETTING PHOTOS")
-        //pass pin into FlickrClient
-        FlickrClient.sharedInstance().getPhotoURLs(pin, page: page, perPage: perPage) { success, result, error in
-            var error: NSError?
-            if !success {
-                //create error
-                println("couldn't get photo urls")
-                error = self.errorHandle("getPhotos", errorString: "Failed to Retrieve Photos")
-            } else {
-                //retrieved photoURLs
-                println("got all the photos")
-                error = nil
-                pin.pages = result![FlickrClient.OutputData.PAGES] as! Int
-                println("pin.pages = \(pin.pages)")
-                var urlStrings = pin.pages == 0 ? [] : result![FlickrClient.OutputData.URLS] as! [String]
-                self.makeFlickrPhotos(urlStrings)
-            }
-            //complete with handler
-            completionHandler(success: success, error: error)
-        }
-    }
-        
+//    //get photos using pin cooridinate
+//    func getPhotos(pin: Pin, page: Int?, perPage: Int, completionHandler: (success: Bool, error: NSError?) -> Void) {
+//        println("GETTING PHOTOS")
+//        //pass pin into FlickrClient
+//        FlickrClient.sharedInstance().getPhotoURLs(pin, page: page, perPage: perPage) { success, result, error in
+//            var error: NSError?
+//            if !success {
+//                //create error
+//                println("couldn't get photo urls")
+//                error = self.errorHandle("getPhotos", errorString: "Failed to Retrieve Photos")
+//            } else {
+//                //retrieved photoURLs
+//                println("got all the photos")
+//                error = nil
+//                pin.pages = result![FlickrClient.OutputData.PAGES] as! Int
+//                println("pin.pages = \(pin.pages)")
+//                var urlStrings = pin.pages == 0 ? [] : result![FlickrClient.OutputData.URLS] as! [String]
+//                self.makeFlickrPhotos(urlStrings)
+//            }
+//            //complete with handler
+//            completionHandler(success: success, error: error)
+//        }
+//    }
+    
     /*
     // MARK: - Navigation
 
