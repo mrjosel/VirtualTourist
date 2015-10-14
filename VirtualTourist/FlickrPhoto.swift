@@ -16,6 +16,9 @@ import UIKit
 class FlickrPhoto: NSManagedObject {
     
     //managed variables
+    //title used for sort descriptor
+    @NSManaged var title: String?
+    
     //pin object assocoated with flickrPhoto object
     @NSManaged var pin: Pin?
     
@@ -40,6 +43,7 @@ class FlickrPhoto: NSManagedObject {
         super.init(entity: entity!, insertIntoManagedObjectContext: context)
         
         //set above params, if they exist
+        self.title = dictionary[FlickrClient.Response.TITLE] as? String
         self.farmID = dictionary[FlickrClient.Response.FARM] as? Int
         self.serverID = dictionary[FlickrClient.Response.SERVER] as? String
         self.photoID = dictionary[FlickrClient.Response.ID] as? String
@@ -84,15 +88,14 @@ class FlickrPhoto: NSManagedObject {
         
         get {
             println("flickrImage requested")
-            //TODO:  NEED TO IMEPLEMENT IN IMAGE CACHING
 //            return FlickrClient.sharedInstance().imageFromURLstring(self.urlString)
 //            return FlickrClient.Caches.imageCache.imageFromURLString(self.urlString)
-            return FlickrClient.Caches.imageCache.imageWithPhotoID(self.photoID)
+            return FlickrClient.Caches.imageCache.imageWithPhotoID(self.flickrImageFileName)
             
         }
         
         set {
-            //TODO: NEED SET IMAGE METHOD
+            FlickrClient.Caches.imageCache.storeImage(newValue, withPhotoID: self.flickrImageFileName!)
         }
     }
 }
