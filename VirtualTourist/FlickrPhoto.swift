@@ -87,11 +87,7 @@ class FlickrPhoto: NSManagedObject {
     var flickrImage : UIImage? {
         
         get {
-            println("flickrImage requested")
-//            return FlickrClient.sharedInstance().imageFromURLstring(self.urlString)
-//            return FlickrClient.Caches.imageCache.imageFromURLString(self.urlString)
             return FlickrClient.Caches.imageCache.imageWithPhotoID(self.flickrImageFileName)
-            
         }
         
         set {

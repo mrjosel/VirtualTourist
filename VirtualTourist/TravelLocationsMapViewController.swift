@@ -77,11 +77,9 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
 
             //create Pin object
             let pin = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
-            println(pin)
 
             //save context
             CoreDataStackManager.sharedInstance().saveContext()
-            println("pin dropped")
         }
     }
 
@@ -110,7 +108,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     //create view for annotations
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
         //TODO: FIX RADIUS BUG
-        println("viewForAnnotation")
+
         //reuseID and pinView
         let reuseID = "pin"
         var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseID) as? MKPinAnnotationView
@@ -131,10 +129,9 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
 
     //perform the following when pin is selected
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
-        println("selected annotation")
+
         //find Pin object matching selected annotationView
         var pin = self.findPersistedPin(view.annotation.coordinate)
-        println(pin)
 
         //deselect pin
         mapView.deselectAnnotation(view.annotation, animated: false)
@@ -144,7 +141,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
 
     //preparing segues
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        println("preparing segue")
+
         //prepare segue, get VC and pass coordinate
         if segue.identifier == "photoAlbumVCSegue" {
 
@@ -167,17 +164,14 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         switch type {
             //insert - add pin to map
         case NSFetchedResultsChangeType.Insert:
-            println("didChangeObject - Insert")
             self.mapView.addAnnotation(pin)
 
             //delete - remove pin from map
         case NSFetchedResultsChangeType.Delete:
-            println("didChangeObject - Delete")
             self.mapView.removeAnnotation(pin)
 
             //update - remove pin from map, add it back in
         case NSFetchedResultsChangeType.Update:
-            println("didChangeObject - Update")
             self.mapView.removeAnnotation(pin)
             self.mapView.addAnnotation(pin)
 

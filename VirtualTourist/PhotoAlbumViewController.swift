@@ -63,32 +63,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //reload all data
         self.photoCollectionView.reloadData()
-
-        //show navBar, setup delete button
-        self.navigationController?.navigationBar.hidden = false
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")
-        self.navigationItem.rightBarButtonItem?.enabled = false
         
-        //setup collectionView
-        self.photoCollectionView.backgroundColor = UIColor.whiteColor()
-        self.photoCollectionView.hidden = true
-        
-        //setup noPhotosLabel
-        self.noPhotosLabel.text = "No Photos"
-        self.noPhotosLabel.hidden = true
-        
-        //set datasource
-        self.photoCollectionView.dataSource = self
-        self.photoCollectionView.delegate = self
-        
-        //setup mapview
-        self.mapView.delegate = self
-        self.mapView.addAnnotation(selectedPin)//.annotation)
-        self.mapView.zoomEnabled = false
-        self.mapView.scrollEnabled = false
-        self.mapView.userInteractionEnabled = false
-        let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin.coordinate, 50000, 50000)
-        self.mapView.setRegion(mapWindow, animated: true)
+        //configure viewController UI
+        self.configureViewController()
         
         //perform fetch
         self.fetchedResultsController.delegate = self
@@ -98,10 +75,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         if self.selectedPin.flickrPhotos.isEmpty {
             //get photos
             self.getPhotos({() -> Void in
-                println("ALL FINISHED")
+            //TODO: NEED BUSY ALERT
             })
         } else {
-            println("persisted photos present, count = \(self.fetchedResultsController.fetchedObjects!.count)")
             //show or hide photoCollectionView and noPhotosLabel based on number of photos present
             self.hideNoPhotosLabel(true)
         }
@@ -118,13 +94,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         let sectionInfo = self.fetchedResultsController.sections![section] as! NSFetchedResultsSectionInfo
         
         //return size of section
-        println("sectionInfo.numberOfObjects = \(sectionInfo.numberOfObjects)")
         return sectionInfo.numberOfObjects
     }
     
     //when cell is selected, change alpha, add index to selectedIndices
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        println("selecting cell at indexPath = \(indexPath.row)")
+
         //get cell and flickrPhoto
         let cell = collectionView.cellForItemAtIndexPath(indexPath) as! PhotoCollectionViewCell
         let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
@@ -137,7 +112,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         
         //reconfigure cell
-//        self.configureCell(cell, atIndexPath: indexPath)
         self.configureCell(cell, withFlickrPhoto: flickrPhoto)
         
         //check if selectedIndicies is empty, if so, disable trash button
@@ -151,7 +125,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         //get cell and flickrPhoto
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCollectionViewCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
         let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
-//        self.configureCell(cell, atIndexPath: indexPath)
+        
+        //configure cell
         self.configureCell(cell, withFlickrPhoto: flickrPhoto)
         
         return cell
@@ -159,7 +134,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     //create three fresh arrays when controller is about to make changes
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
-        println("willChangeContent")
+
         self.deletedIndexPaths = [NSIndexPath]()
         self.insertedIndexPaths = [NSIndexPath]()
         self.updatedIndexPaths = [NSIndexPath]()
@@ -171,7 +146,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         atIndexPath indexPath: NSIndexPath?,
         forChangeType type: NSFetchedResultsChangeType,
         newIndexPath: NSIndexPath?) {
-            println("didChangeObject")
             
             switch type {
             //keeping track of a new photo object being added, array called back in controllerDidChangeContent
@@ -195,7 +169,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     //perform collectionView batch updates using info from updated, deleted, inserted index arrays
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        println("didChangeContent")
+
         //perform batch update
         self.photoCollectionView.performBatchUpdates({() -> Void in
             
@@ -255,12 +229,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                         cellImage = image
                     })
                 } else {
-                    println("failed to get image data from url")
+                    //failed to get data from url
                     cellImage = UIImage(named: "no-image")
                     flickrPhoto.flickrImage = cellImage
                 }
             } else {
-                println("failed to get flickrPhoto.urlString")
+                //failed to get flickrPhoto.urlString"
                 cellImage = UIImage(named: "no-image")
                 flickrPhoto.flickrImage = cellImage
             }
@@ -269,61 +243,23 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         cell.cellImageView.image = cellImage
         
     }
-    
-//    func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
-//        
-//        //get flickPhoto at indexPath
-//        let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
-//        
-//        //pending image
-//        var cellImage = UIImage(named: "pending-image")
-//        
-//        //check if flickrPhoto .urlString is "", set to no-image
-//        if flickrPhoto.urlString == "" || flickrPhoto.urlString == nil {
-//            cellImage = UIImage(named: "no-image")
-//        } else {
-//            //check if image is downloaded and cached (flickrPhoto optional image param is set)
-//            if let flickrImage = flickrPhoto.flickrImage {
-//                //is downloaded and cached, set
-//                cellImage = flickrImage
-//            } else {
-//                //image needs to be downloaded, attempt to download, if failure, set to no-image
-//                if let flickrImage = FlickrClient.sharedInstance().imageFromURLstring(flickrPhoto.urlString!) {
-//                    cellImage = flickrImage
-//                } else {
-//                    cellImage = UIImage(named: "no-image")
-//                }
-//            }
-//            
-//            //set image of cell
-//            cell.cellImageView!.image = cellImage
-//            
-//            //adjust alpha if cell is selected
-//            if let index = find(self.selectedIndices, indexPath) {
-//                cell.alpha = 0.5
-//            } else {
-//                cell.alpha = 1.0
-//            }
-//        }
-//    }
-    
+
     //hide/show noPhotosLabel
     func hideNoPhotosLabel(bool: Bool) {
 
         //TODO: MAKE TEXT LOOK PRETTY
         if bool {
-            println("hiding no photos label")
 //            self.noPhotosLabel.text = "Has Photos"    //DEBUG ONLY, REMOVE AFTER PHOTOS DISPLAY
             //TODO:  ACTUALLY DISPLAY PHOTOS
         } else {
-            println("displaying no photos label")
+            //displaying no photos label
             self.noPhotosLabel.text = "No Photos"
         }
         
         //hide noPhotosLabel based on var bool, do opposite for photoCollectionView
         dispatch_async(dispatch_get_main_queue(), {
-            self.noPhotosLabel.hidden = /*false*/bool// - CHANGE BACK AFTER PHOTOS DISPLAY
-            self.photoCollectionView.hidden = /*true*/ !bool
+            self.noPhotosLabel.hidden = bool
+            self.photoCollectionView.hidden = !bool
         })
     }
 
@@ -354,7 +290,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         self.getPhotos({() -> Void in
             self.newCollectionButton.enabled = true
-            println("NEW COLLECTION")
         })
         
         //end alertView,enable newCollectionButton upon completion
@@ -393,19 +328,19 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     //get photos using pin cooridinate
     func getPhotos(completion: () -> Void) {
-        println("GETTING PHOTOS")
+
         //pass pin into FlickrClient
-        println("no photos persisted, getting photos")
         FlickrClient.sharedInstance().getPhotos(self.selectedPin, perPage: FlickrClient.sharedInstance().perPage) { success, result, error in
             //successfully retreived result
             if success {
-                println("finished retrieving photos")
+
                 //check if there are photos
-                println(result)
                 var hasPhotos: Bool = ((result![FlickrClient.Response.TOTAL] as! String).toInt() != 0)
                 if hasPhotos {
+                    
                     //get array of dicts, each dict is a flickrPhoto object
                     if let photoDicts = result![FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
+                        
                         //parse each dict and create flickrPhoto object
                         var flickrPhoto = photoDicts.map() { (dict: [String: AnyObject]) -> FlickrPhoto in
                             let flickrPhoto = FlickrPhoto(dictionary: dict, context: self.sharedContext)
@@ -414,21 +349,47 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                         }
                     }
                 }
-                
-                //reload photos
-                println("selectedPin.flickrPhotos = \(self.selectedPin.flickrPhotos.count)")
                 //show no photos label depending on whether photos are present or not
                 self.hideNoPhotosLabel(hasPhotos)
             } else {
                 //alert user to error
-                println("failed to get all photos")
                 self.makeAlert(self, title: "Error", error: error)
                 
                 //no photos
                 self.hideNoPhotosLabel(false)
             }
-             completion()
+            //execute completion
+            completion()
         }
+    }
+    
+    //all commands to configure viewController
+    func configureViewController() {
+        //show navBar, setup delete button
+        self.navigationController?.navigationBar.hidden = false
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")
+        self.navigationItem.rightBarButtonItem?.enabled = false
+        
+        //setup collectionView
+        self.photoCollectionView.backgroundColor = UIColor.whiteColor()
+        self.photoCollectionView.hidden = true
+        
+        //setup noPhotosLabel
+        self.noPhotosLabel.text = "No Photos"
+        self.noPhotosLabel.hidden = true
+        
+        //set datasource
+        self.photoCollectionView.dataSource = self
+        self.photoCollectionView.delegate = self
+        
+        //setup mapview
+        self.mapView.delegate = self
+        self.mapView.addAnnotation(selectedPin)
+        self.mapView.zoomEnabled = false
+        self.mapView.scrollEnabled = false
+        self.mapView.userInteractionEnabled = false
+        let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin.coordinate, 50000, 50000)
+        self.mapView.setRegion(mapWindow, animated: true)
     }
     
     override func viewWillDisappear(animated: Bool) {

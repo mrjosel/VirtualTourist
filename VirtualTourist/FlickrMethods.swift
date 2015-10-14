@@ -61,24 +61,19 @@ extension FlickrClient {
         //make urlString for request, attempt request
         let urlString = FlickrClient.sharedInstance().createURLString(params)
         
-        println("beginning GET request")
         //invoke GET method
         let task = FlickrClient.sharedInstance().taskForGETRequest(urlString) {success, result, error in
             //if error, complete with error
             if let error = error {
-                println("error in getPhotos GET request")
                 completionHandler(success: false, result: nil, error: error)
             } else {
-                println("successful GET request in getPhotos")
                 //get array of urlStrings for photos in result
                 if let parsedJSON = result as? [String: AnyObject] {
-                    println("successfully casted JSON to [String: AnyObject]")
                     //get photos portion and complete with handler
                     let photosResult = parsedJSON[FlickrClient.Response.PHOTOS] as! [String: AnyObject]
-                    completionHandler(success: true, result: /*photoURLstrings*/photosResult, error: nil)
+                    completionHandler(success: true, result: photosResult, error: nil)
                 } else {
                     //casting of result to [[String: AnyObject]] failed
-                    println("casting of result to [[String: AnyObject]] failed")
                     completionHandler(success: false, result: nil, error: NSError(domain: "Casting result to parsedJSON", code: 999, userInfo: nil))
                 }
             }
@@ -87,18 +82,15 @@ extension FlickrClient {
     
     //getting image using urlString
     func imageFromURLstring(urlString: String) -> UIImage? {
-        println("getting flickrImage fromURLString")
         //make url from urlString
         var url = NSURL(string: urlString)
         
         //get data at url
         if let imgData = NSData(contentsOfURL: url!) {
             //return image from data
-            println("return flickrImage from data")
             return UIImage(data: imgData)!
         } else {
             //no data at URL, return nil
-            println("no image from data, returning empty image pic")
             return nil
         }
     }
