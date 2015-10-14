@@ -137,7 +137,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         
         //reconfigure cell
-        self.configureCell(cell, atIndexPath: indexPath)
+//        self.configureCell(cell, atIndexPath: indexPath)
+        self.configureCell(cell, withFlickrPhoto: flickrPhoto)
         
         //check if selectedIndicies is empty, if so, disable trash button
         self.navigationItem.rightBarButtonItem?.enabled = !self.selectedIndices.isEmpty
@@ -150,7 +151,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         //get cell and flickrPhoto
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCollectionViewCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
         let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
-        self.configureCell(cell, atIndexPath: indexPath)
+//        self.configureCell(cell, atIndexPath: indexPath)
+        self.configureCell(cell, withFlickrPhoto: flickrPhoto)
         
         return cell
     }
@@ -220,42 +222,90 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         // Dispose of any resources that can be recreated.
     }
     
-    func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
-        
-        //get flickPhoto at indexPath
-        let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
+    func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto) {
         
         //pending image
         var cellImage = UIImage(named: "pending-image")
         
-        //check if flickrPhoto .urlString is "", set to no-image
-        if flickrPhoto.urlString == "" || flickrPhoto.urlString == nil {
+        //check if flickrPhoto.flickrImageFileName is "" or nil, set to no-image
+        if flickrPhoto.flickrImageFileName == nil || flickrPhoto.flickrImageFileName == "" {
             cellImage = UIImage(named: "no-image")
-        } else {
-            //check if image is downloaded and cached (flickrPhoto optional image param is set)
-            if let flickrImage = flickrPhoto.flickrImage {
-                //is downloaded and cached, set
-                cellImage = flickrImage
-            } else {
-                //image needs to be downloaded, attempt to download, if failure, set to no-image
-                if let flickrImage = FlickrClient.sharedInstance().imageFromURLstring(flickrPhoto.urlString!) {
-                    cellImage = flickrImage
+            
+        //flickrImageFileName exists, check if image is attached to flickrPhoto object
+        } else if flickrPhoto.flickrImage != nil {
+            cellImage = flickrPhoto.flickrImage
+        }
+        //flickrImageFileName exists but image is not downloaded/cached/attached to flickrPhoto object
+        else {
+            //get url from flickrPhoto
+            if let urlString = flickrPhoto.urlString {
+                
+                //make url from urlString
+                let url = NSURL(string: urlString)
+                
+                //get data from URL
+                if let data = NSData(contentsOfURL: url!) {
+                    
+                    //make image from data, set to flickrPhoto.flickrImage
+                    let image = UIImage(data: data)
+                    flickrPhoto.flickrImage = image
+                    
+                    //set cellImage to data
+                    dispatch_async(dispatch_get_main_queue(), {
+                        cellImage = image
+                    })
                 } else {
+                    println("failed to get image data from url")
                     cellImage = UIImage(named: "no-image")
+                    flickrPhoto.flickrImage = cellImage
                 }
-            }
-            
-            //set image of cell
-            cell.cellImageView!.image = cellImage
-            
-            //adjust alpha if cell is selected
-            if let index = find(self.selectedIndices, indexPath) {
-                cell.alpha = 0.5
             } else {
-                cell.alpha = 1.0
+                println("failed to get flickrPhoto.urlString")
+                cellImage = UIImage(named: "no-image")
+                flickrPhoto.flickrImage = cellImage
             }
         }
+        //set cell's image to cellImage
+        cell.cellImageView.image = cellImage
+        
     }
+    
+//    func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
+//        
+//        //get flickPhoto at indexPath
+//        let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
+//        
+//        //pending image
+//        var cellImage = UIImage(named: "pending-image")
+//        
+//        //check if flickrPhoto .urlString is "", set to no-image
+//        if flickrPhoto.urlString == "" || flickrPhoto.urlString == nil {
+//            cellImage = UIImage(named: "no-image")
+//        } else {
+//            //check if image is downloaded and cached (flickrPhoto optional image param is set)
+//            if let flickrImage = flickrPhoto.flickrImage {
+//                //is downloaded and cached, set
+//                cellImage = flickrImage
+//            } else {
+//                //image needs to be downloaded, attempt to download, if failure, set to no-image
+//                if let flickrImage = FlickrClient.sharedInstance().imageFromURLstring(flickrPhoto.urlString!) {
+//                    cellImage = flickrImage
+//                } else {
+//                    cellImage = UIImage(named: "no-image")
+//                }
+//            }
+//            
+//            //set image of cell
+//            cell.cellImageView!.image = cellImage
+//            
+//            //adjust alpha if cell is selected
+//            if let index = find(self.selectedIndices, indexPath) {
+//                cell.alpha = 0.5
+//            } else {
+//                cell.alpha = 1.0
+//            }
+//        }
+//    }
     
     //hide/show noPhotosLabel
     func hideNoPhotosLabel(bool: Bool) {

@@ -17,7 +17,7 @@ class ImageCache {
     
     func imageFromURLString(urlString: String?) -> UIImage? {
         
-        // If the identifier is nil, or empty, return nil
+        // If the urlString is nil, or empty, return nil
         if urlString == nil || urlString! == "" {
             return nil
         }
@@ -38,10 +38,34 @@ class ImageCache {
         return nil
     }
     
+    func imageWithPhotoID(photoID: String?) -> UIImage? {
+        
+        // If the photoID is nil, or empty, return nil
+        if photoID == nil || photoID == "" {
+            return nil
+        }
+        
+        //create path using photoID as a filename and image data var
+        let path = self.pathForIdentifier(photoID!) + ".jpg"
+        var data : NSData?
+        
+        //check the memory cache to see if photo exists
+        if let image = self.inMemoryCache.objectForKey(path) as? UIImage {
+            return image
+        }
+        
+        //if not in cache, try the hard-drive
+        if let data = NSData(contentsOfFile: path) {
+            return UIImage(data: data)
+        }
+        //image doesn't exist, return nil
+        return nil
+    }
+    
     // MARK: - Saving images
     
-    func storeImage(image: UIImage?, withIdentifier identifier: String) {
-        let path = pathForIdentifier(identifier)
+    func storeImage(image: UIImage?, withPhotoID photoID: String) {
+        let path = pathForIdentifier(photoID) + ".jpg"
         
         // If the image is nil, remove images from the cache
         if image == nil {
