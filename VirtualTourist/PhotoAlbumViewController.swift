@@ -22,9 +22,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     //Selected Pin variable
     var selectedPin: Pin!
     
-    //image array, get images from flickrPhoto objects and append to local array, use local array to configure images (faster this way)
-    var flickrImgs = [UIImage]()
-    
     // The selected indexes array keeps all of the indexPaths for cells that are "selected". The array is
     // used inside cellForItemAtIndexPath to lower the alpha of selected cells.  You can see how the array
     // works by searchign through the code for 'selectedIndexes'
@@ -190,7 +187,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                 self.photoCollectionView.reloadItemsAtIndexPaths([indexPath])
             }
             
-            }, completion: {(Bool) -> Void in CoreDataStackManager.sharedInstance().saveContext()})
+            }, completion: nil/*{(Bool) -> Void in CoreDataStackManager.sharedInstance().saveContext()}*/)
     }
 
     override func didReceiveMemoryWarning() {
@@ -217,7 +214,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         //flickrImageFileName exists but image is not downloaded/cached/attached to flickrPhoto object
         else {
-
+            //TODO: NEED TO MANAGE IF PHOTOS ARE SET OR NOT (REFRESH BUTTON?)
+            //TODO: WHY ARE IMAGES SET TO GRAY??????
+            
             //get url from flickrPhoto
             if let urlString = flickrPhoto.urlString {
                 
@@ -234,8 +233,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                         if let imgData = result as? NSData {
                             //attempt to create UIImage from casted data
                             if let img = UIImage(data: imgData) {
-                                //set cellImage to img
-                                cellImage = img
+                                
+                                //set flickrPhoto imageto cellImage
+                                flickrPhoto.flickrImage = img
+                                
+                                //set cell's image to cellImage
+                                dispatch_async(dispatch_get_main_queue(), {
+                                    cell.cellImageView!.image = img
+                                })
                             } else {
                                 //failed to create img from casted data, set image to no-image
                                 println("failed to create img from casted data")
@@ -248,38 +253,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                         }
                     }
                 }
- 
-//                //make url from urlString
-//                let url = NSURL(string: urlString)
-//                
-                //get data from URL
-//                if let data = NSData(contentsOfURL: url!) {
-//
-//                    //make image from data, set to flickrPhoto.flickrImage
-//                    let image = UIImage(data: data)
-//                    flickrPhoto.flickrImage = image
-//                    
-//                    //set cellImage to data
-//                    cellImage = image
-//                } else {
-//                    //failed to get data from url
-//                    cellImage = UIImage(named: "no-image")
-//                    flickrPhoto.flickrImage = cellImage
-//                }
-//                let request = NSURLRequest(URL: url!)
             } else {
                 //failed to get flickrPhoto.urlString"
                 cellImage = UIImage(named: "no-image")
             }
         }
-        
-        //set cell's image to cellImage
-        dispatch_async(dispatch_get_main_queue(), {
-            cell.cellImageView!.image = cellImage!
-        })
-        
-        //set flickrPhoto imageto cellImage
-        flickrPhoto.flickrImage = cellImage
+        cell.cellImageView!.image = cellImage
 
         //adjust alpha if cell is selected
         if let index = find(self.selectedIndices, indexPath) {
@@ -408,11 +387,25 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
     }
     
+    //attempt to reload flickrImages
+    func refresh() {
+        
+        //check if there are fetched photos
+        if self.selectedPin.flickrPhotos.count != 0 {
+            for flickrPhoto in self.selectedPin.flickrPhotos {
+                flickrPhoto.flickrImage = nil
+            }
+            CoreDataStackManager.sharedInstance().saveContext()
+        }
+    }
+    
     //all commands to configure viewController
     func configureViewController() {
         //show navBar, setup delete button
         self.navigationController?.navigationBar.hidden = false
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")
+        /*self.navigationItem.rightBarButtonItem =*/ var rightButtons = [UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")]
+        rightButtons.append(UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refresh"))
+        self.navigationItem.rightBarButtonItems = rightButtons
         self.navigationItem.rightBarButtonItem?.enabled = false
         
         //setup collectionView
