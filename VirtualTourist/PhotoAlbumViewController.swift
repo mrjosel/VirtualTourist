@@ -112,7 +112,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         
         //reconfigure cell
-        self.configureCell(cell, withFlickrPhoto: flickrPhoto)
+        self.configureCell(cell, withFlickrPhoto: flickrPhoto, atIndexPath: indexPath)
         
         //check if selectedIndicies is empty, if so, disable trash button
         self.navigationItem.rightBarButtonItem?.enabled = !self.selectedIndices.isEmpty
@@ -127,7 +127,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
         
         //configure cell
-        self.configureCell(cell, withFlickrPhoto: flickrPhoto)
+        self.configureCell(cell, withFlickrPhoto: flickrPhoto, atIndexPath: indexPath)
         
         return cell
     }
@@ -196,7 +196,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         // Dispose of any resources that can be recreated.
     }
     
-    func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto) {
+    func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto, atIndexPath indexPath: NSIndexPath) {
         
         //pending image
         var cellImage = UIImage(named: "pending-image")
@@ -244,6 +244,16 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         dispatch_async(dispatch_get_main_queue(), {
             cell.cellImageView.image = cellImage
         })
+
+        //set image of cell
+        cell.cellImageView!.image = cellImage
+
+        //adjust alpha if cell is selected
+        if let index = find(self.selectedIndices, indexPath) {
+            cell.alpha = 0.5
+        } else {
+            cell.alpha = 1.0
+        }
     
     }
 
