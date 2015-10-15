@@ -16,4 +16,14 @@ class PhotoCollectionViewCell: UICollectionViewCell {
     
     //flickrPhoto, may not be required
     var flickrPhoto: FlickrPhoto?
+    
+    //how to cancel session task
+    var taskToCancelifCellIsReused: NSURLSessionTask? {
+        
+        didSet {
+            if let taskToCancel = oldValue {
+                taskToCancel.cancel()
+            }
+        }
+    }
 }

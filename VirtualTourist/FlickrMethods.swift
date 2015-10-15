@@ -62,7 +62,8 @@ extension FlickrClient {
         let urlString = FlickrClient.sharedInstance().createURLString(params)
         
         //invoke GET method
-        let task = FlickrClient.sharedInstance().taskForGETRequest(urlString) {success, result, error in
+        let task = FlickrClient.sharedInstance().taskForGETRequest(urlString, requestType: FlickrClient.Request.JSON){ success, result, error in
+            
             //if error, complete with error
             if let error = error {
                 completionHandler(success: false, result: nil, error: error)

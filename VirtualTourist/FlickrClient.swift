@@ -11,15 +11,19 @@
 import Foundation
 
 //class for managing all Flickr activity
-class FlickrClient {
+class FlickrClient: NSObject {
     
-    //page and perPage variables
-//    var page = 1
-    var perPage = 20
-//    var maxPages: Int?
+    //perPage variable
+    var perPage: Int
     
     //photoURLs TO BE REMOVED AFTER CORE DATA IMPLEMENTATION
-    var photoURLs = [String]()
+//    var photoURLs = [String]()
+    
+    //initialize vars
+    override init() {
+        self.perPage = 20
+        super.init()
+    }
     
     static let masterParams = [
         FlickrClient.Params.API : FlickrClient.Keys.API_KEY,
@@ -60,6 +64,8 @@ class FlickrClient {
     //request
     struct Request {
         static let REST = "rest"
+        static let JSON = "json"
+        static let IMAGE = "image"
     }
     
     //response

@@ -116,6 +116,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //check if selectedIndicies is empty, if so, disable trash button
         self.navigationItem.rightBarButtonItem?.enabled = !self.selectedIndices.isEmpty
+        
+        println(flickrPhoto.urlString!)
 
     }
     
@@ -198,6 +200,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto, atIndexPath indexPath: NSIndexPath) {
         
+        //TODO: RECONFIGURE TO WORK WITH SESSION TASK
+        
         //pending image
         var cellImage = UIImage(named: "pending-image")
         
@@ -208,7 +212,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             
         //flickrImageFileName exists, check if image is attached to flickrPhoto object
         } else if flickrPhoto.flickrImage != nil {
-            println("loading image")
+            println("loading image \(flickrPhoto.flickrImage)")
             cellImage = flickrPhoto.flickrImage
         }
         //flickrImageFileName exists but image is not downloaded/cached/attached to flickrPhoto object
@@ -216,37 +220,66 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
 
             //get url from flickrPhoto
             if let urlString = flickrPhoto.urlString {
-
-                //make url from urlString
-                let url = NSURL(string: urlString)
-
-                //get data from URL
-                if let data = NSData(contentsOfURL: url!) {
-
-                    //make image from data, set to flickrPhoto.flickrImage
-                    let image = UIImage(data: data)
-                    flickrPhoto.flickrImage = image
+                
+                //use REST method to get image
+                let task = FlickrClient.sharedInstance().taskForGETRequest(urlString, requestType: FlickrClient.Request.IMAGE) {success, result, error in
                     
-                    //set cellImage to data
-                    cellImage = image
-                } else {
-                    //failed to get data from url
-                    cellImage = UIImage(named: "no-image")
-                    flickrPhoto.flickrImage = cellImage
+                    //check for error
+                    if let error = error {
+                        //error, set image to no-image
+                        println("Error: \(error.localizedDescription)")
+                        cellImage = UIImage(named: "no-image")
+                    } else {
+                        //attempt to cast result as NSData
+                        if let imgData = result as? NSData {
+                            //attempt to create UIImage from casted data
+                            if let img = UIImage(data: imgData) {
+                                //set cellImage to img
+                                cellImage = img
+                            } else {
+                                //failed to create img from casted data, set image to no-image
+                                println("failed to create img from casted data")
+                                cellImage = UIImage(named: "no-image")
+                            }
+                        } else {
+                            //failed to cast result to NSData, set image to no-image
+                            println("failed to cast result to NSData")
+                            cellImage = UIImage(named: "no-image")
+                        }
+                    }
                 }
+ 
+//                //make url from urlString
+//                let url = NSURL(string: urlString)
+//                
+                //get data from URL
+//                if let data = NSData(contentsOfURL: url!) {
+//
+//                    //make image from data, set to flickrPhoto.flickrImage
+//                    let image = UIImage(data: data)
+//                    flickrPhoto.flickrImage = image
+//                    
+//                    //set cellImage to data
+//                    cellImage = image
+//                } else {
+//                    //failed to get data from url
+//                    cellImage = UIImage(named: "no-image")
+//                    flickrPhoto.flickrImage = cellImage
+//                }
+//                let request = NSURLRequest(URL: url!)
             } else {
                 //failed to get flickrPhoto.urlString"
                 cellImage = UIImage(named: "no-image")
-                flickrPhoto.flickrImage = cellImage
             }
         }
+        
         //set cell's image to cellImage
         dispatch_async(dispatch_get_main_queue(), {
-            cell.cellImageView.image = cellImage
+            cell.cellImageView!.image = cellImage!
         })
-
-        //set image of cell
-        cell.cellImageView!.image = cellImage
+        
+        //set flickrPhoto imageto cellImage
+        flickrPhoto.flickrImage = cellImage
 
         //adjust alpha if cell is selected
         if let index = find(self.selectedIndices, indexPath) {
@@ -254,7 +287,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         } else {
             cell.alpha = 1.0
         }
-    
     }
 
     //hide/show noPhotosLabel
