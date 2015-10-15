@@ -203,31 +203,32 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //check if flickrPhoto.flickrImageFileName is "" or nil, set to no-image
         if flickrPhoto.flickrImageFileName == nil || flickrPhoto.flickrImageFileName == "" {
+            println("no image")
             cellImage = UIImage(named: "no-image")
             
         //flickrImageFileName exists, check if image is attached to flickrPhoto object
         } else if flickrPhoto.flickrImage != nil {
+            println("loading image")
             cellImage = flickrPhoto.flickrImage
         }
         //flickrImageFileName exists but image is not downloaded/cached/attached to flickrPhoto object
         else {
+
             //get url from flickrPhoto
             if let urlString = flickrPhoto.urlString {
-                
+
                 //make url from urlString
                 let url = NSURL(string: urlString)
-                
+
                 //get data from URL
                 if let data = NSData(contentsOfURL: url!) {
-                    
+
                     //make image from data, set to flickrPhoto.flickrImage
                     let image = UIImage(data: data)
                     flickrPhoto.flickrImage = image
                     
                     //set cellImage to data
-                    dispatch_async(dispatch_get_main_queue(), {
-                        cellImage = image
-                    })
+                    cellImage = image
                 } else {
                     //failed to get data from url
                     cellImage = UIImage(named: "no-image")
@@ -240,8 +241,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             }
         }
         //set cell's image to cellImage
-        cell.cellImageView.image = cellImage
-        
+        dispatch_async(dispatch_get_main_queue(), {
+            cell.cellImageView.image = cellImage
+        })
+    
     }
 
     //hide/show noPhotosLabel
