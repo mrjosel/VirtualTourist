@@ -32,14 +32,12 @@ extension FlickrClient {
                 //successful request, check for type of request to understand how to handle result
                 switch requestType {
                 case FlickrClient.Request.JSON:
-                    println("JSON REQUEST")
                     self.parseJSON(data, completionHandler: completionHandler)
                 case FlickrClient.Request.IMAGE:
                     completionHandler(sucess: true, result: data, error: nil)
-                    println("IMAGE REQUEST")
                 default:
                     println("invalid selection, aborting")
-                    abort()
+                    abort() //TODO: REMOVE PRIOR TO SUBMISSION
                 }
             }
         }

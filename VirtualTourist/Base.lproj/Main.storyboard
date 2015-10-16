@@ -53,6 +53,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="z61-oo-BpB">
+                                <rect key="frame" x="260" y="260.5" width="80" height="80"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="80" id="ci8-4V-59P"/>
+                                    <constraint firstAttribute="height" constant="80" id="hmG-ZA-fR3"/>
+                                </constraints>
+                            </activityIndicatorView>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="UUw-le-ONR">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="210"/>
                             </mapView>
@@ -69,7 +76,7 @@
                                 </items>
                             </toolbar>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="La9-sy-HBH">
-                                <rect key="frame" x="279" y="352" width="42" height="21"/>
+                                <rect key="frame" x="279" y="352" width="42" height="20.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
@@ -109,6 +116,7 @@
                             <constraint firstItem="UUw-le-ONR" firstAttribute="top" secondItem="ygH-5J-L2c" secondAttribute="topMargin" id="3I6-g7-P28"/>
                             <constraint firstItem="9Bh-hs-1Ti" firstAttribute="top" secondItem="pqE-qx-2Bp" secondAttribute="bottom" constant="145" id="5mQ-no-tMj"/>
                             <constraint firstItem="9Bh-hs-1Ti" firstAttribute="leading" secondItem="ygH-5J-L2c" secondAttribute="leadingMargin" constant="-16" id="5tQ-L0-rcx"/>
+                            <constraint firstAttribute="centerX" secondItem="z61-oo-BpB" secondAttribute="centerX" id="92w-Zv-gIl"/>
                             <constraint firstItem="La9-sy-HBH" firstAttribute="top" secondItem="UUw-le-ONR" secondAttribute="bottom" constant="142" id="BqI-tF-18E"/>
                             <constraint firstItem="UUw-le-ONR" firstAttribute="leading" secondItem="ygH-5J-L2c" secondAttribute="leadingMargin" constant="-16" id="Iuv-xt-IBB"/>
                             <constraint firstAttribute="centerX" secondItem="La9-sy-HBH" secondAttribute="centerX" id="Qbd-uq-GgF"/>
@@ -118,11 +126,13 @@
                             <constraint firstAttribute="trailingMargin" secondItem="ydO-MF-1Xc" secondAttribute="trailing" constant="-16" id="hcJ-rg-gdw"/>
                             <constraint firstAttribute="trailingMargin" secondItem="UUw-le-ONR" secondAttribute="trailing" constant="-16" id="pbd-jf-qaG"/>
                             <constraint firstAttribute="trailingMargin" secondItem="9Bh-hs-1Ti" secondAttribute="trailing" constant="-16" id="sCy-DC-OaZ"/>
+                            <constraint firstAttribute="centerY" secondItem="z61-oo-BpB" secondAttribute="centerY" id="vT6-EX-a4x"/>
                             <constraint firstItem="ydO-MF-1Xc" firstAttribute="top" secondItem="9Bh-hs-1Ti" secondAttribute="bottom" id="wKx-KZ-fe5"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="4w0-U1-Nfn"/>
                     <connections>
+                        <outlet property="activityIndicator" destination="z61-oo-BpB" id="QJI-9a-u9M"/>
                         <outlet property="mapView" destination="UUw-le-ONR" id="RHr-64-UmA"/>
                         <outlet property="newCollectionButton" destination="B8L-x2-WAa" id="070-c6-RuC"/>
                         <outlet property="noPhotosLabel" destination="La9-sy-HBH" id="nAc-M0-ag2"/>

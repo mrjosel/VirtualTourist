@@ -18,6 +18,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     @IBOutlet weak var toolbar: UIToolbar!
     @IBOutlet weak var newCollectionButton: UIBarButtonItem!
     @IBOutlet weak var noPhotosLabel: UILabel!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    
+    //navigation buttons
+    var trashButton: UIBarButtonItem!
+    var refreshButton: UIBarButtonItem!
     
     //Selected Pin variable
     var selectedPin: Pin!
@@ -70,10 +75,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //get photos if no photos persisted with Pin
         if self.selectedPin.flickrPhotos.isEmpty {
-            //get photos
-            self.getPhotos({() -> Void in
-            //TODO: NEED BUSY ALERT
-            })
+
+        //get photos
+        self.getPhotos()
+            
         } else {
             //show or hide photoCollectionView and noPhotosLabel based on number of photos present
             self.hideNoPhotosLabel(true)
@@ -187,7 +192,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                 self.photoCollectionView.reloadItemsAtIndexPaths([indexPath])
             }
             
-            }, completion: nil/*{(Bool) -> Void in CoreDataStackManager.sharedInstance().saveContext()}*/)
+            }, completion: nil)
     }
 
     override func didReceiveMemoryWarning() {
@@ -197,25 +202,19 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     func configureCell(cell: PhotoCollectionViewCell, withFlickrPhoto flickrPhoto: FlickrPhoto, atIndexPath indexPath: NSIndexPath) {
         
-        //TODO: RECONFIGURE TO WORK WITH SESSION TASK
-        
         //pending image
         var cellImage = UIImage(named: "pending-image")
         
         //check if flickrPhoto.flickrImageFileName is "" or nil, set to no-image
         if flickrPhoto.flickrImageFileName == nil || flickrPhoto.flickrImageFileName == "" {
-            println("no image")
             cellImage = UIImage(named: "no-image")
             
         //flickrImageFileName exists, check if image is attached to flickrPhoto object
         } else if flickrPhoto.flickrImage != nil {
-            println("loading image \(flickrPhoto.flickrImage)")
             cellImage = flickrPhoto.flickrImage
         }
         //flickrImageFileName exists but image is not downloaded/cached/attached to flickrPhoto object
         else {
-            //TODO: NEED TO MANAGE IF PHOTOS ARE SET OR NOT (REFRESH BUTTON?)
-            //TODO: WHY ARE IMAGES SET TO GRAY??????
             
             //get url from flickrPhoto
             if let urlString = flickrPhoto.urlString {
@@ -270,16 +269,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
 
     //hide/show noPhotosLabel
     func hideNoPhotosLabel(bool: Bool) {
-
-        //TODO: MAKE TEXT LOOK PRETTY
-        if bool {
-//            self.noPhotosLabel.text = "Has Photos"    //DEBUG ONLY, REMOVE AFTER PHOTOS DISPLAY
-            //TODO:  ACTUALLY DISPLAY PHOTOS
-        } else {
-            //displaying no photos label
-            self.noPhotosLabel.text = "No Photos"
-        }
-        
+        println(bool)
         //hide noPhotosLabel based on var bool, do opposite for photoCollectionView
         dispatch_async(dispatch_get_main_queue(), {
             self.noPhotosLabel.hidden = bool
@@ -301,30 +291,16 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             self.selectedPin.page = NSNumber(int: 1)
         }
         
-        //begin alertView while retrieving photos
-//        var gettingPhotosAlert = self.makeGettingPhotosAlert()
-        
         //remove all photos
         self.deleteAllFlickrPhotos(self.selectedPin)
         
-        //get photos, overwrites existing collection
-        
-        //TODO: WHY DO PHOTOS SHOW UP OUT OF ORDER??????????????????????
-        
-        
-        self.getPhotos({() -> Void in
-            self.newCollectionButton.enabled = true
-        })
-        
-        //end alertView,enable newCollectionButton upon completion
-//        gettingPhotosAlert.dismissViewControllerAnimated(true, completion: {
-//            self.newCollectionButton.enabled = true
-//        })
+        //get photos
+        self.getPhotos()
     }
     
     //if there are indicies in the selectedIndices array, delete those photos
     func trashSelectedPhotos() {
-        
+
         //flickrPhotos to delete array
         var flickrPhotosToDelete = [FlickrPhoto]()
         
@@ -338,12 +314,18 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             self.sharedContext.deleteObject(flickrPhoto)
         }
         
+        //save context
+        CoreDataStackManager.sharedInstance().saveContext()
+        
         //clear selectedIndicies array
         self.selectedIndices = [NSIndexPath]()
         
+        //show or hide noPhotos based on size of FlickrPhotos array
+        self.hideNoPhotosLabel(self.selectedPin.flickrPhotos.count != 0)
+        
     }
     
-    //remove all flicrPhotos
+    //remove all flickrPhotos
     func deleteAllFlickrPhotos(pin: Pin) {
         for flickrPhoto in self.fetchedResultsController.fetchedObjects as! [FlickrPhoto] {
             self.sharedContext.deleteObject(flickrPhoto)
@@ -351,7 +333,15 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     }
     
     //get photos using pin cooridinate
-    func getPhotos(completion: () -> Void) {
+    func getPhotos() {
+        
+        //disable UI
+        self.disableUI(true)
+        
+        //make activity indicator
+        dispatch_async(dispatch_get_main_queue(), {
+            self.activityIndicator.startAnimating()
+        })
 
         //pass pin into FlickrClient
         FlickrClient.sharedInstance().getPhotos(self.selectedPin, perPage: FlickrClient.sharedInstance().perPage) { success, result, error in
@@ -382,8 +372,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                 //no photos
                 self.hideNoPhotosLabel(false)
             }
-            //execute completion
-            completion()
+            
+            //enable UI
+            self.disableUI(false)
+            
+            //make activity indicator
+            dispatch_async(dispatch_get_main_queue(), {
+                self.activityIndicator.stopAnimating()
+            })
         }
     }
     
@@ -395,25 +391,41 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             for flickrPhoto in self.selectedPin.flickrPhotos {
                 flickrPhoto.flickrImage = nil
             }
+            //save context
             CoreDataStackManager.sharedInstance().saveContext()
+            
+            //reload data
+            self.photoCollectionView.reloadData()
         }
+    }
+    
+    //disable all UIButtons
+    func disableUI(bool: Bool) {
+        self.newCollectionButton.enabled = bool
+        self.navigationItem.leftBarButtonItem?.enabled = bool
+        self.trashButton.enabled = bool
+        self.refreshButton.enabled = bool
     }
     
     //all commands to configure viewController
     func configureViewController() {
-        //show navBar, setup delete button
+        //show navBar, setup trash and refresh buttons
+        //make rightbar buttons
+        self.trashButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")
+        self.refreshButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refresh")
         self.navigationController?.navigationBar.hidden = false
-        /*self.navigationItem.rightBarButtonItem =*/ var rightButtons = [UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")]
-        rightButtons.append(UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refresh"))
-        self.navigationItem.rightBarButtonItems = rightButtons
+        self.navigationItem.rightBarButtonItems = [self.trashButton, self.refreshButton]
         self.navigationItem.rightBarButtonItem?.enabled = false
+        
+        //activityIndicator
+        self.activityIndicator.hidesWhenStopped = true
         
         //setup collectionView
         self.photoCollectionView.backgroundColor = UIColor.whiteColor()
         self.photoCollectionView.hidden = true
         
         //setup noPhotosLabel
-        self.noPhotosLabel.text = "No Photos"
+        self.noPhotosLabel.text = "No Photos"   //TODO: MAKE TEXT PRETTY
         self.noPhotosLabel.hidden = true
         
         //set datasource
