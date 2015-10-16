@@ -81,7 +81,7 @@ extension FlickrClient {
         }
     }
     
-    //getting image using urlString
+    //getting image using urlString- UNUSED
     func imageFromURLstring(urlString: String) -> UIImage? {
         //make url from urlString
         var url = NSURL(string: urlString)

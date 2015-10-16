@@ -117,10 +117,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         self.configureCell(cell, withFlickrPhoto: flickrPhoto, atIndexPath: indexPath)
         
         //check if selectedIndicies is empty, if so, disable trash button
-        self.navigationItem.rightBarButtonItem?.enabled = !self.selectedIndices.isEmpty
-        
-        println(flickrPhoto.urlString!)
-
+        self.trashButton.enabled = !self.selectedIndices.isEmpty
     }
     
     //cell to be populated
@@ -132,6 +129,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //configure cell
         self.configureCell(cell, withFlickrPhoto: flickrPhoto, atIndexPath: indexPath)
+        
+        //check if selectedIndicies is empty, if so, disable trash button
+        self.trashButton.enabled = !self.selectedIndices.isEmpty
         
         return cell
     }
@@ -269,7 +269,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
 
     //hide/show noPhotosLabel
     func hideNoPhotosLabel(bool: Bool) {
-        println(bool)
+
         //hide noPhotosLabel based on var bool, do opposite for photoCollectionView
         dispatch_async(dispatch_get_main_queue(), {
             self.noPhotosLabel.hidden = bool
@@ -283,19 +283,27 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //disable newCollectionButton
         self.newCollectionButton.enabled = false
-        
+        println("page = \(self.selectedPin.page as! Int)")
+        println("pages = \(self.selectedPin.pages as! Int)")    //TODO:  SET PAGES VAR
         //increment page in case newCollectionButton is pressed, roll back to page 1 if maxPage is reached
         if (self.selectedPin.page as! Int) < (self.selectedPin.pages as! Int) {
+            println("page is less than pages")
             self.selectedPin.page = NSNumber(int: (self.selectedPin.page as! Int) + 1)
         } else {
+            println("resetting page to 1")
             self.selectedPin.page = NSNumber(int: 1)
         }
         
         //remove all photos
-        self.deleteAllFlickrPhotos(self.selectedPin)
+        self.deleteAllFlickrPhotos()
         
         //get photos
         self.getPhotos()
+        
+        println("page = \(self.selectedPin.page as! Int)")
+        
+        //enable button
+        self.newCollectionButton.enabled = true
     }
     
     //if there are indicies in the selectedIndices array, delete those photos
@@ -326,7 +334,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     }
     
     //remove all flickrPhotos
-    func deleteAllFlickrPhotos(pin: Pin) {
+    func deleteAllFlickrPhotos() {
         for flickrPhoto in self.fetchedResultsController.fetchedObjects as! [FlickrPhoto] {
             self.sharedContext.deleteObject(flickrPhoto)
         }
@@ -335,11 +343,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     //get photos using pin cooridinate
     func getPhotos() {
         
-        //disable UI
-        self.disableUI(true)
-        
-        //make activity indicator
+        //disable UI, make activity indicator
         dispatch_async(dispatch_get_main_queue(), {
+            self.enableUI(false)
             self.activityIndicator.startAnimating()
         })
 
@@ -354,7 +360,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                     
                     //get array of dicts, each dict is a flickrPhoto object
                     if let photoDicts = result![FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
-                        
+                        //TODO:  SET PAGES VAR OF SELECTED PIN
                         //parse each dict and create flickrPhoto object
                         var flickrPhoto = photoDicts.map() { (dict: [String: AnyObject]) -> FlickrPhoto in
                             let flickrPhoto = FlickrPhoto(dictionary: dict, context: self.sharedContext)
@@ -373,12 +379,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                 self.hideNoPhotosLabel(false)
             }
             
-            //enable UI
-            self.disableUI(false)
-            
-            //make activity indicator
+            //enable UI, stop activity indicator
             dispatch_async(dispatch_get_main_queue(), {
                 self.activityIndicator.stopAnimating()
+                self.enableUI(true)
             })
         }
     }
@@ -400,7 +404,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     }
     
     //disable all UIButtons
-    func disableUI(bool: Bool) {
+    func enableUI(bool: Bool) {
+        
+        if bool {
+            println("enabling UI")
+        } else {
+            println("disabling UI")
+        }
+        
         self.newCollectionButton.enabled = bool
         self.navigationItem.leftBarButtonItem?.enabled = bool
         self.trashButton.enabled = bool
