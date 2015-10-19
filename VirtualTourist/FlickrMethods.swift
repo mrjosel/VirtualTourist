@@ -28,7 +28,7 @@ extension FlickrClient {
         
         
         //output url, starting with BASE_URL
-        var urlString: String = FlickrClient.URLs.BASE_URL
+        let urlString: String = FlickrClient.URLs.BASE_URL
         
         //join key/val pairs with "=", make new array
         var newArray = [String]()
@@ -62,7 +62,7 @@ extension FlickrClient {
         let urlString = FlickrClient.sharedInstance().createURLString(params)
         
         //invoke GET method
-        let task = FlickrClient.sharedInstance().taskForGETRequest(urlString, requestType: FlickrClient.Request.JSON){ success, result, error in
+        _ = FlickrClient.sharedInstance().taskForGETRequest(urlString, requestType: FlickrClient.Request.JSON){ success, result, error in
             
             //if error, complete with error
             if let error = error {
@@ -84,7 +84,7 @@ extension FlickrClient {
     //getting image using urlString- UNUSED
     func imageFromURLstring(urlString: String) -> UIImage? {
         //make url from urlString
-        var url = NSURL(string: urlString)
+        let url = NSURL(string: urlString)
         
         //get data at url
         if let imgData = NSData(contentsOfURL: url!) {

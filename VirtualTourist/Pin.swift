@@ -41,6 +41,6 @@ class Pin: NSManagedObject, MKAnnotation {
     }
     
     var coordinate: CLLocationCoordinate2D {
-        return CLLocationCoordinate2D(latitude: self.latitude as! Double, longitude: self.longitude as! Double)
+        return CLLocationCoordinate2D(latitude: self.latitude as Double, longitude: self.longitude as Double)
     }
 }

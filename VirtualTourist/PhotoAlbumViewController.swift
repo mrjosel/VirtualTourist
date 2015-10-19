@@ -22,7 +22,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     //navigation buttons
     var trashButton: UIBarButtonItem!
-    var refreshButton: UIBarButtonItem!
     
     //Selected Pin variable
     var selectedPin: Pin!
@@ -71,7 +70,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //perform fetch
         self.fetchedResultsController.delegate = self
-        self.fetchedResultsController.performFetch(nil)
+        do {
+            try self.fetchedResultsController.performFetch()
+        } catch _ {
+        }
         
         //get photos if no photos persisted with Pin
         if self.selectedPin.flickrPhotos.isEmpty {
@@ -93,7 +95,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     //gets size for collectionView
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         //get section info
-        let sectionInfo = self.fetchedResultsController.sections![section] as! NSFetchedResultsSectionInfo
+        let sectionInfo = self.fetchedResultsController.sections![section] as NSFetchedResultsSectionInfo
         
         //return size of section
         return sectionInfo.numberOfObjects
@@ -107,7 +109,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         let flickrPhoto = self.fetchedResultsController.objectAtIndexPath(indexPath) as! FlickrPhoto
         
         //add or remove cell index from selectedIndicies
-        if let index = find(self.selectedIndices, indexPath) {
+        if let index = self.selectedIndices.indexOf(indexPath) {
             self.selectedIndices.removeAtIndex(index)
         } else {
             self.selectedIndices.append(indexPath)
@@ -146,7 +148,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
 
     //called when one or more photos are being added/deleted
     func controller(controller: NSFetchedResultsController,
-        didChangeObject anObject: AnyObject,
+        didChangeObject anObject: NSManagedObject,
         atIndexPath indexPath: NSIndexPath?,
         forChangeType type: NSFetchedResultsChangeType,
         newIndexPath: NSIndexPath?) {
@@ -220,12 +222,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             if let urlString = flickrPhoto.urlString {
                 
                 //use REST method to get image
-                let task = FlickrClient.sharedInstance().taskForGETRequest(urlString, requestType: FlickrClient.Request.IMAGE) {success, result, error in
+                _ = FlickrClient.sharedInstance().taskForGETRequest(urlString, requestType: FlickrClient.Request.IMAGE) {success, result, error in
                     
                     //check for error
                     if let error = error {
                         //error, set image to no-image
-                        println("Error: \(error.localizedDescription)")
+                        print("Error: \(error.localizedDescription)")
                         cellImage = UIImage(named: "no-image")
                     } else {
                         //attempt to cast result as NSData
@@ -258,31 +260,16 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         cell.cellImageView!.image = cellImage
 
         //adjust alpha if cell is selected
-        if let index = find(self.selectedIndices, indexPath) {
+        if let _ = self.selectedIndices.indexOf(indexPath) {
             cell.alpha = 0.5
         } else {
             cell.alpha = 1.0
         }
     }
 
-    //hide/show noPhotosLabel
-    func noPhotosPresentUIconfig(bool: Bool) {
-
-        //hide noPhotosLabel based on var bool, do opposite for photoCollectionView, disable trashButton and newCollection accordingly
-        dispatch_async(dispatch_get_main_queue(), {
-            self.noPhotosLabel.hidden = !bool
-            self.photoCollectionView.hidden = bool
-            self.newCollectionButton.enabled = !bool
-        })
-    }
-
     //grabs new collection of photos by incrementing page
     //TODO: RANDOMIZE PAGE AND NUMBER OF PHOTOS TO GRAB
     @IBAction func newCollectionButtonPressed(sender: UIBarButtonItem) {
-        
-        //cast page and pages to Int
-        var page = self.selectedPin.page != nil ? self.selectedPin.page as! Int : 1
-        var pages = self.selectedPin.pages != nil ? self.selectedPin.pages as! Int : 1
 
         //increment page in case newCollectionButton is pressed, roll back to page 1 if maxPage is reached
         if (self.selectedPin.page as! Int) < (self.selectedPin.pages as! Int) {
@@ -321,7 +308,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         self.selectedIndices = [NSIndexPath]()
         
         //show or hide noPhotos based on size of FlickrPhotos array
-        self.noPhotosPresentUIconfig(self.selectedPin.flickrPhotos.count != 0)
+        self.enableUI(true, hasPhotos: self.selectedPin.flickrPhotos.count != 0)
         
     }
     
@@ -349,7 +336,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             //successfully retreived result
             if success {
                 //set hasPhotos, check if there are photos
-                hasPhotos = ((result![FlickrClient.Response.TOTAL] as! String).toInt() != 0)
+                hasPhotos = (Int((result![FlickrClient.Response.TOTAL] as! String)) != 0)
                 if hasPhotos! {
                     //if total is non zero, pages is also non-zero, set value in pin object
                     self.selectedPin.pages = result![FlickrClient.Response.PAGES] as! Int
@@ -373,27 +360,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             dispatch_async(dispatch_get_main_queue(), {
                 self.activityIndicator.stopAnimating()
                 self.enableUI(true, hasPhotos: hasPhotos)
-                
-                //show no photos label depending on whether photos are present or not
-                println("setting noPhotos because hasPhotos = \(hasPhotos!)")
-//                self.noPhotosPresentUIconfig(!hasPhotos!)
             })
-        }
-    }
-    
-    //attempt to reload flickrImages
-    func refresh() {
-        
-        //check if there are fetched photos
-        if self.selectedPin.flickrPhotos.count != 0 {
-            for flickrPhoto in self.selectedPin.flickrPhotos {
-                flickrPhoto.flickrImage = nil
-            }
-            //save context
-            CoreDataStackManager.sharedInstance().saveContext()
-            
-            //reload data
-            self.photoCollectionView.reloadData()
         }
     }
     
@@ -402,7 +369,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //enable/disable elements regardless of photos
         self.navigationItem.leftBarButtonItem?.enabled = bool
-        self.refreshButton.enabled = bool
         
         //enable/disable, show/hide based on whether photos exist
         if let hasPhotos = hasPhotos {
@@ -419,15 +385,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     //all commands to configure viewController
     func configureViewController() {
-        //show navBar, setup trash and refresh buttons
+        //show navBar, setup trash button
         //make rightbar buttons
         self.trashButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")
-        self.refreshButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refresh")
         self.trashButton.enabled = false
         self.newCollectionButton.enabled = false
         
         self.navigationController?.navigationBar.hidden = false
-        self.navigationItem.rightBarButtonItems = [self.trashButton, self.refreshButton]
+        self.navigationItem.rightBarButtonItem = self.trashButton
         
         //activityIndicator
         self.activityIndicator.hidesWhenStopped = true
@@ -457,7 +422,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     //alert function
     func makeAlert(hostVC: UIViewController, title: String, error: NSError?) -> Void {
         //handler for OK button depending on VC
-        var handler: ((alert: UIAlertAction!) -> (Void))?
+//        let handler: ((alert: UIAlertAction!) -> (Void))?
         var messageText: String!
         
         if let error = error {
@@ -467,10 +432,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         
         //create UIAlertVC
-        var alertVC = UIAlertController(title: title, message: messageText, preferredStyle: UIAlertControllerStyle.Alert)
+        let alertVC = UIAlertController(title: title, message: messageText, preferredStyle: UIAlertControllerStyle.Alert)
         
         //create action
-        let ok = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: handler) //TODO: DO I NEED A HANDLER?
+        let ok = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil)
         
         //add actions to alertVC
         alertVC.addAction(ok)

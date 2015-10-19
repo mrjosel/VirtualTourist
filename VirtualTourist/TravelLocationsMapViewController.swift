@@ -58,8 +58,11 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         self.mapView.delegate = self
         self.fetchedResultsController.delegate = self
 
-        //perform fetch
-        self.fetchedResultsController.performFetch(nil)
+        do {
+            //perform fetch
+            try self.fetchedResultsController.performFetch()
+        } catch _ {
+        }
 
         //add annotations from fetchedResultsController
         self.mapView.addAnnotations(self.fetchedResultsController.fetchedObjects as! [Pin])
@@ -76,7 +79,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         if sender.state == .Began {
 
             //create Pin object
-            let pin = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
+            _ = Pin(latitude: coordinates.latitude as Double, longitude: coordinates.longitude as Double, context: self.sharedContext)
 
             //save context
             CoreDataStackManager.sharedInstance().saveContext()
@@ -93,8 +96,8 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         for object in self.fetchedResultsController.fetchedObjects! {
             //get lat and lon from Pin object
             let pin = object as! Pin
-            var lat = pin.latitude
-            var lon = pin.longitude
+            let lat = pin.latitude
+            let lon = pin.longitude
 
             //coords match, pin object is found
             if testLat == lat && testLon == lon {
@@ -106,12 +109,12 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     }
 
     //create view for annotations
-    func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
 
         //reuseID and pinView
         let reuseID = "pin"
         var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseID) as? MKPinAnnotationView
-        let gesture = mapView.gestureRecognizers![0] as! UILongPressGestureRecognizer
+
         //if no pinView, then create one
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseID)
@@ -127,10 +130,10 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     }
 
     //perform the following when pin is selected
-    func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
 
         //find Pin object matching selected annotationView
-        var pin = self.findPersistedPin(view.annotation.coordinate)
+        let pin = self.findPersistedPin(view.annotation!.coordinate)
 
         //deselect pin
         mapView.deselectAnnotation(view.annotation, animated: false)
@@ -155,7 +158,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         super.prepareForSegue(segue, sender: sender)
     }
 
-    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+    func controller(controller: NSFetchedResultsController, didChangeObject anObject: NSManagedObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
         //create annotation from anObject
         let pin = anObject as! Pin
 

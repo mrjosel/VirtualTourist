@@ -32,17 +32,17 @@ extension FlickrClient {
                 //successful request, check for type of request to understand how to handle result
                 switch requestType {
                 case FlickrClient.Request.JSON:
-                    self.parseJSON(data, completionHandler: completionHandler)
+                    self.parseJSON(data!, completionHandler: completionHandler)
                 case FlickrClient.Request.IMAGE:
                     completionHandler(sucess: true, result: data, error: nil)
                 default:
-                    println("invalid selection, aborting")
+                    print("invalid selection, aborting")
                     abort() //TODO: REMOVE PRIOR TO SUBMISSION
                 }
             }
         }
-        task.resume()
-        return task
+        task!.resume()
+        return task!
     }
     
     //JSON parser
@@ -52,7 +52,13 @@ extension FlickrClient {
         var error: NSError?
         
         //parse data into JSON object
-        var parsedJSON : AnyObject! = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments, error: &error)
+        var parsedJSON : AnyObject!
+        do {
+            parsedJSON = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments)
+        } catch let error1 as NSError {
+            error = error1
+            parsedJSON = nil
+        }
         
         //check for error
         if let error = error {

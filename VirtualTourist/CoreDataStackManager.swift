@@ -20,7 +20,7 @@ class CoreDataStackManager {
         let urls = NSFileManager.defaultManager().URLsForDirectory(NSSearchPathDirectory.DocumentDirectory, inDomains: NSSearchPathDomainMask.UserDomainMask)
         
         //return first item in array
-        return urls[urls.count - 1] as! NSURL
+        return urls[urls.count - 1] as NSURL
         }()
     
     //managed object model
@@ -46,12 +46,15 @@ class CoreDataStackManager {
         var error: NSError? = nil
         
         //attempt to add persistent store
-        if coordinator?.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: nil, error: &error) == nil {
+        do {
+            try coordinator?.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: nil)
+        } catch var error1 as NSError {
+            error = error1
             //attempt failed, set cooridnator to nil and make NSError
             coordinator = nil
             
             //create error dict
-            let dict = NSMutableDictionary()
+            var dict = [NSObject : AnyObject]()//NSMutableDictionary()
             dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data"
             dict[NSLocalizedFailureReasonErrorKey] = "There was an error creating or loading the application's saved data."
             dict[NSUnderlyingErrorKey] = error
@@ -61,6 +64,8 @@ class CoreDataStackManager {
             NSLog("Unresolved error \(error), \(error!.localizedDescription)")
             abort()
             
+        } catch {
+            fatalError()
         }
         return coordinator
         }()
@@ -81,18 +86,20 @@ class CoreDataStackManager {
         }()
     
     func saveContext() {
-        println("saving context")
-        //get managed object context
-        if let context = self.managedObjectContext {
-            
-            //error in case save failure
-            var error: NSError? = nil
-            
-            if context.hasChanges && !context.save(&error) {
-                NSLog("Unresolved error: \(error!), \(error!.localizedDescription)")
+        print("saving context")
+        
+        //check for changes
+        if self.managedObjectContext!.hasChanges {
+            do {
+                //changes exist, try to save
+                try managedObjectContext!.save()
+            } catch {
+                // Replace this implementation with code to handle the error appropriately.
+                // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+                let nserror = error as NSError
+                NSLog("Unresolved error \(nserror), \(nserror.userInfo)")
                 abort()
             }
-            //else - save successful
         }
     }
     
