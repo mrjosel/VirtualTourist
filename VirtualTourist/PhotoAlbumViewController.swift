@@ -76,12 +76,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         //get photos if no photos persisted with Pin
         if self.selectedPin.flickrPhotos.isEmpty {
 
-        //get photos
-        self.getPhotos()
+            //get photos
+            self.getPhotos()
             
         } else {
-            //show or hide photoCollectionView and noPhotosLabel based on number of photos present
-            self.hideNoPhotosLabel(true)
+            //enable UI elements based on having photos
+            self.enableUI(true, hasPhotos: true)
         }
     }
     
@@ -242,12 +242,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                                 })
                             } else {
                                 //failed to create img from casted data, set image to no-image
-                                println("failed to create img from casted data")
                                 cellImage = UIImage(named: "no-image")
                             }
                         } else {
                             //failed to cast result to NSData, set image to no-image
-                            println("failed to cast result to NSData")
                             cellImage = UIImage(named: "no-image")
                         }
                     }
@@ -268,12 +266,13 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     }
 
     //hide/show noPhotosLabel
-    func hideNoPhotosLabel(bool: Bool) {
+    func noPhotosPresentUIconfig(bool: Bool) {
 
-        //hide noPhotosLabel based on var bool, do opposite for photoCollectionView
+        //hide noPhotosLabel based on var bool, do opposite for photoCollectionView, disable trashButton and newCollection accordingly
         dispatch_async(dispatch_get_main_queue(), {
-            self.noPhotosLabel.hidden = bool
-            self.photoCollectionView.hidden = !bool
+            self.noPhotosLabel.hidden = !bool
+            self.photoCollectionView.hidden = bool
+            self.newCollectionButton.enabled = !bool
         })
     }
 
@@ -281,16 +280,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     //TODO: RANDOMIZE PAGE AND NUMBER OF PHOTOS TO GRAB
     @IBAction func newCollectionButtonPressed(sender: UIBarButtonItem) {
         
-        //disable newCollectionButton
-        self.newCollectionButton.enabled = false
-        println("page = \(self.selectedPin.page as! Int)")
-        println("pages = \(self.selectedPin.pages as! Int)")    //TODO:  SET PAGES VAR
+        //cast page and pages to Int
+        var page = self.selectedPin.page != nil ? self.selectedPin.page as! Int : 1
+        var pages = self.selectedPin.pages != nil ? self.selectedPin.pages as! Int : 1
+
         //increment page in case newCollectionButton is pressed, roll back to page 1 if maxPage is reached
         if (self.selectedPin.page as! Int) < (self.selectedPin.pages as! Int) {
-            println("page is less than pages")
             self.selectedPin.page = NSNumber(int: (self.selectedPin.page as! Int) + 1)
         } else {
-            println("resetting page to 1")
             self.selectedPin.page = NSNumber(int: 1)
         }
         
@@ -299,11 +296,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         //get photos
         self.getPhotos()
-        
-        println("page = \(self.selectedPin.page as! Int)")
-        
-        //enable button
-        self.newCollectionButton.enabled = true
     }
     
     //if there are indicies in the selectedIndices array, delete those photos
@@ -329,7 +321,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         self.selectedIndices = [NSIndexPath]()
         
         //show or hide noPhotos based on size of FlickrPhotos array
-        self.hideNoPhotosLabel(self.selectedPin.flickrPhotos.count != 0)
+        self.noPhotosPresentUIconfig(self.selectedPin.flickrPhotos.count != 0)
         
     }
     
@@ -343,9 +335,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     //get photos using pin cooridinate
     func getPhotos() {
         
+        //bool for if photos exist,
+        var hasPhotos: Bool?// = false
+        
         //disable UI, make activity indicator
         dispatch_async(dispatch_get_main_queue(), {
-            self.enableUI(false)
+            self.enableUI(false, hasPhotos: nil)
             self.activityIndicator.startAnimating()
         })
 
@@ -353,14 +348,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         FlickrClient.sharedInstance().getPhotos(self.selectedPin, perPage: FlickrClient.sharedInstance().perPage) { success, result, error in
             //successfully retreived result
             if success {
-
-                //check if there are photos
-                var hasPhotos: Bool = ((result![FlickrClient.Response.TOTAL] as! String).toInt() != 0)
-                if hasPhotos {
+                //set hasPhotos, check if there are photos
+                hasPhotos = ((result![FlickrClient.Response.TOTAL] as! String).toInt() != 0)
+                if hasPhotos! {
+                    //if total is non zero, pages is also non-zero, set value in pin object
+                    self.selectedPin.pages = result![FlickrClient.Response.PAGES] as! Int
                     
                     //get array of dicts, each dict is a flickrPhoto object
                     if let photoDicts = result![FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
-                        //TODO:  SET PAGES VAR OF SELECTED PIN
                         //parse each dict and create flickrPhoto object
                         var flickrPhoto = photoDicts.map() { (dict: [String: AnyObject]) -> FlickrPhoto in
                             let flickrPhoto = FlickrPhoto(dictionary: dict, context: self.sharedContext)
@@ -369,20 +364,19 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                         }
                     }
                 }
-                //show no photos label depending on whether photos are present or not
-                self.hideNoPhotosLabel(hasPhotos)
             } else {
                 //alert user to error
                 self.makeAlert(self, title: "Error", error: error)
-                
-                //no photos
-                self.hideNoPhotosLabel(false)
             }
             
             //enable UI, stop activity indicator
             dispatch_async(dispatch_get_main_queue(), {
                 self.activityIndicator.stopAnimating()
-                self.enableUI(true)
+                self.enableUI(true, hasPhotos: hasPhotos)
+                
+                //show no photos label depending on whether photos are present or not
+                println("setting noPhotos because hasPhotos = \(hasPhotos!)")
+//                self.noPhotosPresentUIconfig(!hasPhotos!)
             })
         }
     }
@@ -403,19 +397,24 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
     }
     
-    //disable all UIButtons
-    func enableUI(bool: Bool) {
+    //enable/disable UI elements selectively, based on whether photos exist or not
+    func enableUI(bool: Bool, hasPhotos: Bool?) {
         
-        if bool {
-            println("enabling UI")
-        } else {
-            println("disabling UI")
-        }
-        
-        self.newCollectionButton.enabled = bool
+        //enable/disable elements regardless of photos
         self.navigationItem.leftBarButtonItem?.enabled = bool
-        self.trashButton.enabled = bool
         self.refreshButton.enabled = bool
+        
+        //enable/disable, show/hide based on whether photos exist
+        if let hasPhotos = hasPhotos {
+            self.newCollectionButton.enabled = hasPhotos
+            self.photoCollectionView.hidden = !hasPhotos
+            self.noPhotosLabel.hidden = hasPhotos
+        } else {
+            //hasPhotos is nil, use bool
+            self.newCollectionButton.enabled = bool
+            self.photoCollectionView.hidden = !bool
+            self.noPhotosLabel.hidden = !bool
+        }
     }
     
     //all commands to configure viewController
@@ -424,9 +423,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         //make rightbar buttons
         self.trashButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "trashSelectedPhotos")
         self.refreshButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refresh")
+        self.trashButton.enabled = false
+        self.newCollectionButton.enabled = false
+        
         self.navigationController?.navigationBar.hidden = false
         self.navigationItem.rightBarButtonItems = [self.trashButton, self.refreshButton]
-        self.navigationItem.rightBarButtonItem?.enabled = false
         
         //activityIndicator
         self.activityIndicator.hidesWhenStopped = true
@@ -451,6 +452,32 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         self.mapView.userInteractionEnabled = false
         let mapWindow = MKCoordinateRegionMakeWithDistance(self.selectedPin.coordinate, 50000, 50000)
         self.mapView.setRegion(mapWindow, animated: true)
+    }
+    
+    //alert function
+    func makeAlert(hostVC: UIViewController, title: String, error: NSError?) -> Void {
+        //handler for OK button depending on VC
+        var handler: ((alert: UIAlertAction!) -> (Void))?
+        var messageText: String!
+        
+        if let error = error {
+            messageText = error.localizedDescription
+        } else {
+            messageText = "Press OK to Continue"
+        }
+        
+        //create UIAlertVC
+        var alertVC = UIAlertController(title: title, message: messageText, preferredStyle: UIAlertControllerStyle.Alert)
+        
+        //create action
+        let ok = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: handler) //TODO: DO I NEED A HANDLER?
+        
+        //add actions to alertVC
+        alertVC.addAction(ok)
+        dispatch_async(dispatch_get_main_queue(), {
+            //present alertVC
+            hostVC.presentViewController(alertVC, animated: true, completion: nil)
+        })
     }
     
     override func viewWillDisappear(animated: Bool) {

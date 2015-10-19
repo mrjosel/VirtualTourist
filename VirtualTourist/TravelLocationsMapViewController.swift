@@ -107,7 +107,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
 
     //create view for annotations
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
-        //TODO: FIX RADIUS BUG
 
         //reuseID and pinView
         let reuseID = "pin"
