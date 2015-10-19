@@ -344,7 +344,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                     //get array of dicts, each dict is a flickrPhoto object
                     if let photoDicts = result![FlickrClient.Response.PHOTO] as? [[String: AnyObject]] {
                         //parse each dict and create flickrPhoto object
-                        var flickrPhoto = photoDicts.map() { (dict: [String: AnyObject]) -> FlickrPhoto in
+                        _ = photoDicts.map() { (dict: [String: AnyObject]) -> FlickrPhoto in
                             let flickrPhoto = FlickrPhoto(dictionary: dict, context: self.sharedContext)
                             flickrPhoto.pin = self.selectedPin
                             return flickrPhoto
