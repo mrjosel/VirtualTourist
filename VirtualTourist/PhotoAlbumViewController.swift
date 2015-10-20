@@ -148,7 +148,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
 
     //called when one or more photos are being added/deleted
     func controller(controller: NSFetchedResultsController,
-        didChangeObject anObject: NSManagedObject,
+        didChangeObject anObject: AnyObject,
         atIndexPath indexPath: NSIndexPath?,
         forChangeType type: NSFetchedResultsChangeType,
         newIndexPath: NSIndexPath?) {

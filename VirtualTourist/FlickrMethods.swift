@@ -37,7 +37,7 @@ extension FlickrClient {
         }
         
         //make urlAppendix by joining newArray items with "&"
-        let urlAppendix = "&".join(newArray)
+        let urlAppendix = newArray.joinWithSeparator("&")
         
         //add rest request and paramString to url and return
         return urlString + "/" + FlickrClient.Request.REST + "/?" + urlAppendix

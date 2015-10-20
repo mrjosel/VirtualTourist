@@ -41,8 +41,8 @@ extension FlickrClient {
                 }
             }
         }
-        task!.resume()
-        return task!
+        task.resume()
+        return task
     }
     
     //JSON parser
