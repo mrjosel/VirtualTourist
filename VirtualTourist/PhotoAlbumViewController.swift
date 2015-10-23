@@ -11,7 +11,7 @@ import MapKit
 import CoreData
 
 class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate ,UICollectionViewDelegate, UICollectionViewDataSource {
-
+    
     //Outlets
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var photoCollectionView: UICollectionView!
@@ -59,7 +59,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Do any additional setup after loading the view.
         
         //reload all data
@@ -144,6 +144,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         self.deletedIndexPaths = [NSIndexPath]()
         self.insertedIndexPaths = [NSIndexPath]()
         self.updatedIndexPaths = [NSIndexPath]()
+
     }
 
     //called when one or more photos are being added/deleted
@@ -167,8 +168,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
                 self.updatedIndexPaths.append(indexPath!)
             case .Move:
                 //unused
-                break
-            default:
                 break
             }
     }
@@ -421,10 +420,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     //alert function
     func makeAlert(hostVC: UIViewController, title: String, error: NSError?) -> Void {
-        //handler for OK button depending on VC
-//        let handler: ((alert: UIAlertAction!) -> (Void))?
+        
+        //error message
         var messageText: String!
         
+        //set error message based on error contents
         if let error = error {
             messageText = error.localizedDescription
         } else {
@@ -447,6 +447,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     override func viewWillDisappear(animated: Bool) {
         CoreDataStackManager.sharedInstance().saveContext()
+        self.showContents(true)
     }
 
     /*

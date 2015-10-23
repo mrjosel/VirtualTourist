@@ -51,6 +51,19 @@ class FlickrPhoto: NSManagedObject {
         
     }
     
+    //called when object's context is saved
+    override func willSave() {
+        
+        //object is marked for deletion from context
+        if self.deleted {
+            
+            //set flickrImage nil, method removes it from file manager
+            self.flickrImage = nil
+        }
+        //perform super
+        super.willSave()
+    }
+    
     //valid url for the actual photo, using above params
     var urlString: String? {
         get {

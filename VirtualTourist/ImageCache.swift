@@ -45,7 +45,7 @@ class ImageCache {
         }
         
         //create path using photoID as a filename
-        let path = self.pathForIdentifier(photoID!) + ".jpg"
+        let path = self.pathForIdentifier(photoID!)
         
         //check the memory cache to see if photo exists
         if let image = self.inMemoryCache.objectForKey(path) as? UIImage {
@@ -63,7 +63,7 @@ class ImageCache {
     // MARK: - Saving images
     
     func storeImage(image: UIImage?, withPhotoID photoID: String) {
-        let path = pathForIdentifier(photoID) + ".jpg"
+        let path = pathForIdentifier(photoID)
         
         // If the image is nil, remove images from the cache
         if image == nil {
